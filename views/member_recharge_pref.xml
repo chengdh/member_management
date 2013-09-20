@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <record id="view_member_recharge_pref_form" model="ir.ui.view">
+      <field name="name">member_management.member_recharge_pref_form</field>
+      <field name="model">member_management.member_recharge_pref</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form string="member recharge pref" version="7.0">
+          <sheet>
+            <group col='4'>
+              <field name="name" select="1" />
+              <field name="member_class_id" select="1" />
+              <field name="start_fee" />
+              <field name="end_fee" />
+              <field name="pref_fee" />
+              <field name="active"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_member_recharge_pref_tree" model="ir.ui.view">
+      <field name="name">member_management.member_recharge_pref_tree</field>
+      <field name="model">member_management.member_recharge_pref</field>
+      <field name="type">tree</field>
+      <field name="arch" type="xml">
+        <tree string="member recharge prefs">
+          <field name="name"/>
+          <field name="member_class_id" />
+          <field name="start_fee" />
+          <field name="end_fee" />
+          <field name="pref_fee" />
+          <field name="active"/>
+        </tree>
+      </field>
+    </record>
+
+
+    <record id="action_member_recharge_pref" model="ir.actions.act_window">
+      <field name="name">会员充值优惠</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">member_management.member_recharge_pref</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name='help'>会员充值优惠设置</field>
+    </record>
+    <menuitem action="action_member_recharge_pref" id="menu_action_member_recharge_pref" parent="menu_members" name="会员充值优惠" sequence="3"/>
+  </data>
+</openerp>

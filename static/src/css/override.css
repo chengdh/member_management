@@ -1,0 +1,100 @@
+/* room status bar display style */
+html {font-size : 14px;}
+.nav {margin-bottom : 0;}
+#room_info_tab .tab-content {background : #FFF;}
+#room_info_tab .nav-tabs > li {margin-bottom: -3px;}
+
+#room_pos_wrapper {
+  padding: 0;
+  padding-top : 35px;
+  margin: 0;
+  background-color: #f0eeee;
+  font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
+  color: #555555;
+  font-size: 12px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  text-shadow: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+/*header style */
+#room_pos_wrapper #topheader {
+    height: 35px;
+    margin:0;
+    padding:0;
+    color: gray;
+    background: #393939;
+    background: -moz-linear-gradient(#7b7979, #393939);
+    background: -webkit-gradient(linear, left top, left bottom, from(#7b7979), to(#393939));
+}
+#room_pos_wrapper #branding{
+    position: absolute;
+    display: table-cell;
+    left:0;
+    top:0;
+    width:150px;
+    height:100%;
+    margin:0;
+    padding:0;
+    border-right: 1px solid #373737;
+    text-align:left;
+    line-height:100%;
+    vertical-align: middle;
+}
+#room_pos_wrapper #branding img {
+    height: 32px;
+    width: 116px;
+    margin-left:5px;
+    vertical-align:middle;
+}
+#room_pos_wrapper #branding .username{
+    float:right;
+    color:#DDD;
+    font-size:16px;
+    margin-right:32px;
+    margin-top:10px;
+    font-style:italic;
+}
+
+/*定义包厢显示*/
+table.room-widget {
+    table-layout : fixed;
+    width : 130px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    border-radius: 6px;
+    -webkit-box-shadow: 0 1px 1px #ccc;
+    -moz-box-shadow: 0 1px 1px #ccc;
+    box-shadow: 0 1px 1px #ccc;
+}
+.room-widget .room-widget-header{
+    text-align : center;
+}
+.room-widget .room-widget-header ul{
+    text-align : left;
+}
+
+/*set room state clolor*/
+#room_list .room-widget,button.btn-room-state-filter {color : #FFF;}
+#room_list li.free .room-widget,button.btn-room-state-filter[data-room-state=fee] {color : #000;}
+#room_list li.scheduled .room-widget,button.btn-room-state-filter[data-room-state=scheduled]  {background : #6666FF;}
+#room_list li.in_use .room-widget,button.btn-room-state-filter[data-room-state=in_use] {background : #CF0D47;}
+#room_list li.checkout .room-widget,button.btn-room-state-filter[data-room-state=checkout]  {background : #0DDB3D;}
+#room_list li.buyout .room-widget,button.btn-room-state-filter[data-room-state=buyout]  {background : #0D89DB;}
+#room_list li.buytime .room-widget,button.btn-room-state-filter[data-room-state=buytime]  {background : #CFDC0D;}
+#room_list li.visit .room-widget,button.btn-room-state-filter[data-room-state=visit]  {background : #F9AF09;}
+#room_list li.clean .room-widget,button.btn-room-state-filter[data-room-state=clean]  {background : #0AA87E;}
+#room_list li.lock .room-widget,button.btn-room-state-filter[data-room-state=lock]  {background : #4625DC;}
+#room_list li.malfunction .room-widget,button.btn-room-state-filter[data-room-state=malfunction]  {background : #060315;}
+
+/*说明图标样式*/
+#icon-descripe .label{
+    -webkit-border-radius : 0;
+    moz-border-radius : 0;
+    border-radius : 0;
+}

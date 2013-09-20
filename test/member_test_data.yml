@@ -1,0 +1,65 @@
+-
+  应能够成功保存会员等级信息
+-
+  !record {model : member_management.member_class,id: member_class_1}:
+    name: 金卡
+    card_fee: 20
+    drinks_fee_discount: 80
+    room_fee_discount: 90
+    up_card_fee: 15
+    drinks_price_type: room_price
+    room_limit_count: 0
+    market_limit_count: 0
+    can_points: True
+    can_manual_input: True
+    can_store_money: True
+    active: True
+-
+ 保存会员信息_1
+-
+  !record {model: member_management.member,id: member_card_1}:
+    member_no: "1234567789"
+    name: "程东辉"
+    member_class_id: member_class_jin
+    member_card_no: "123456789"
+    card_password: "12312312"
+-
+  保存discount_card
+-
+  !record {model: member_management.discount_card,id: discount_card_1}:
+    card_no: "123456789"
+    discount_card_type_id: discount_card_type_1
+
+-
+  应能够成功保存会员充值优惠信息
+-
+  !record {model: member_management.member_recharge_pref,id: member_recharge_pref_1}:
+    name: "充2000送100"
+    member_class_id: member_class_jin
+    start_fee: 2000
+    end_fee: 2999
+    pref_fee: 100
+
+-
+  应能够成功保存会员充值信息
+-
+  !record {model: member_management.member_charge,id: member_charge_1}:
+    member_id: member_card_1
+    charge_fee: 2200
+-
+  会员卡余额应为2100
+-
+  !assert {model: member_management.member,id: member_card_1,string: "会员卡余额计算不正确"}:
+    - balance == 2300
+-
+  使用会员卡消费100元
+-
+  !record {model: member_management.member_consumption,id: member_consumption_1}:
+    member_id: member_card_1
+    paid_fee: 100
+
+-
+  会员卡余额应变为2200元
+-
+  !assert {model: member_management.member,id: member_card_1,string: "会员卡余额计算不正确"}:
+    - balance == 2200

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <record id="view_member_management_points_config_form" model="ir.ui.view">
+      <field name="name">member_management.member_management_points_config</field>
+      <field name="model">member_management.points_config</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form string="points config" version="7.0">
+          <sheet>
+            <group col='4'>
+              <field name="config_prior"/>
+              <field name="drinks_fee"/>
+              <field name="drinks_points"/>
+              <field name="room_fee"/>
+              <field name="room_points"/>
+              <field name="active"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_member_management_points_config_tree" model="ir.ui.view">
+      <field name="name">member_management.member_management_points_config_tree</field>
+      <field name="model">member_management.points_config</field>
+      <field name="type">tree</field>
+      <field name="arch" type="xml">
+        <tree string='积分规则'>
+          <field name="config_prior"/>
+          <field name="drinks_fee" />
+          <field name="drinks_points" />
+          <field name="room_fee" />
+          <field name="room_points" />
+          <field name="active" />
+        </tree>
+      </field>
+    </record>
+
+
+    <record id="action_member_management_points_config" model="ir.actions.act_window">
+      <field name="name">积分规则设置</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">member_management.points_config</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name='help'>积分规则设置</field>
+    </record>
+
+    <menuitem action="action_member_management_points_config" id="menu_action_member_management_points_config" parent="menu_members" name="积分规则设置" sequence="0"/>
+  </data>
+</openerp>

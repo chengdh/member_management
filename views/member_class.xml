@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_member_class_form" model="ir.ui.view">
+            <field name="name">member_management.member_class_form</field>
+            <field name="model">member_management.member_class</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="member class" version="7.0">
+                  <sheet>
+                    <h1><field name="name" /></h1>
+                    <group col='4'>
+                      <field name="card_fee" />
+                      <field name="up_card_fee" />
+                      <field name="drinks_fee_discount" />
+                      <field name="room_fee_discount" />
+                      <field name="drinks_price_type" />
+                      <field name="room_limit_count" />
+                      <field name="market_limit_count" />
+                      <field name="can_points" />
+                      <field name="can_manual_input" />
+                      <field name="can_store_money" />
+                      <field name="active"/>
+                    </group>
+                  </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_member_class_tree" model="ir.ui.view">
+            <field name="name">member_management.member_class_tree</field>
+            <field name="model">member_management.member_class</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="会员等级">
+                    <field name="name"/>
+                    <field name="card_fee" />
+                    <field name="up_card_fee" />
+                    <field name="drinks_fee_discount" />
+                    <field name="room_fee_discount" />
+                    <field name="drinks_price_type" />
+                    <field name="room_limit_count" />
+                    <field name="market_limit_count" />
+                    <field name="can_points" />
+                    <field name="can_manual_input" />
+                    <field name="can_store_money" />
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="action_member_class" model="ir.actions.act_window">
+            <field name="name">会员等级</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">member_management.member_class</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name='help'>设置会员等级信息</field>
+        </record>
+
+        <menuitem action="action_member_class" id="menu_action_member_class" parent="menu_members" name="会员等级" sequence="1"/>
+
+    </data>
+</openerp>
+

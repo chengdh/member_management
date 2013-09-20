@@ -1,0 +1,1785 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- vim:fdl=1:-->
+<templates id="template" xml:space="preserve">
+  <t t-name="RoomPointOfSale">
+    <div id="room_pos_wrapper">
+      <div id="topheader" class="navbar navbar-fixed-top">
+        <div class="container-fluid">
+          <div id="branding">
+            <img src="/ktv_sale/static/src/img/logo.png" />
+            <span class="placeholder-UsernameWidget"></span>
+          </div>
+          <div id="rightheader" class='pull-right'>
+            <a class="btn btn-close btn-small" href="#"><i class="icon-arrow-right"></i> 退出</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid alert-wrapper"></div>
+      <div class="container-fluid">
+        <div class="row-fluid">
+          <div class='span9'>
+            <div id="room_status"></div>
+            <div id="room_filter"></div>
+            <ul id="room_list" class="thumbnails"></ul>
+            <div id="operate_area"></div>
+          </div>
+          <div class='span3'>
+            <div  id="room_info_tab"></div>
+            <!--图标说明-->
+            <div class='well well-small' id='icon-descripe'>
+              <span class='label'>图例:</span>
+              <span class='label'><i class='icon-user'></i>&#160;会员消费</span>
+              <span class="label"><i class='icon-flag'></i>&#160;买断</span>
+              <span class="label"><i class='icon-bell'></i>&#160;到钟提醒</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </t>
+  <!--买断select 选择-->
+  <t t-name="buyout-select-template">
+    <div class="control-group info pull-left">
+      <label class="control-label" for="changed_buyout_config_id">买断名称:</label>
+      <div class="controls">
+        <select id="changed_buyout_config_id" name="changed_buyout_config_id">
+          <t t-foreach="buyout_config_lines" t-as="l">
+            <option t-att-value="l.id">
+              <t t-esc="l.name"/>:
+              <t t-esc="l.buyout_fee"/>元/
+              <t t-esc="l.buyout_time"/>分钟
+              (<t t-esc="l.time_range"/>)
+              <t t-if="l.is_member">会员专用</t>
+            </option>
+          </t>
+        </select>
+      </div>
+    </div>
+  </t>
+  <!--错误对话框-->
+  <t t-name="alert-template">
+    <div class="alert">
+      <button type="button" class="close" data-dismiss="alert">&#x00D7;</button>
+      <strong><t t-esc='title'/></strong>
+      <p><t t-esc="info"/></p>
+    </div>
+  </t>
+  <!--包厢widget-->
+  <t t-name="room-template">
+    <table class="table well room-widget">
+      <tr>
+        <td colspan='3' class='room-widget-header'>
+          <div class="btn-group">
+            <button class="btn dropdown-toggle" data-toggle="dropdown">
+              <t t-esc="room.name"/>
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu room-action-menu">
+              <li class="action_room_scheduled"><a  href="#">预定</a></li>
+              <li class="action_room_scheduled_cancel"><a href="#">取消预定</a></li>
+              <li class="divider"></li>
+              <li class="action_room_opens"><a href="#">开房</a></li>
+              <li class="action_room_change"><a href="#">换房</a></li>
+              <li class="action_room_merge"><a href="#">并房</a></li>
+              <li class="divider"></li>
+              <li class="action_room_buytime"><a href="#">买钟</a></li>
+              <li class="action_room_buyout"><a href="#">买断</a></li>
+              <li class="action_room_buytime_continue"><a href="#">续钟</a></li>
+              <li class="action_room_buytime_refund"><a href="#">退钟</a></li>
+              <li class="divider"></li>
+              <li class="action_room_checkout"><a href="#">结账</a></li>
+              <li class="action_room_reopen"><a href="#">结账重开</a></li>
+            </ul>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan='3'>
+          <t t-esc="room.room_type_id[1]" />
+          <t t-if="room.sum_paid_info">
+            (<t t-esc="room.sum_paid_info.persons_count" />)
+          </t>
+          <t t-if="!room.sum_paid_info">
+            (<t t-esc="room.minimum_persons" />)
+          </t>
+        </td>
+      </tr>
+      <tr>
+        <t t-if="room.sum_paid_info">
+          <td>
+            <t t-if = "room.sum_paid_info.context_open_only_time">
+              <t t-esc = "room.sum_paid_info.context_open_only_time" />
+            </t>
+            <t t-if = "!room.sum_paid_info.context_open_only_time">
+              &#160;
+            </t>
+          </td>
+          <t t-if="room.sum_paid_info.left_minutes > 0">
+            <td><t t-esc = "room.sum_paid_info.context_close_only_time" /></td>
+            <td><t t-esc = "room.sum_paid_info.left_minutes" /></td>
+          </t>
+          <t t-if="!room.sum_paid_info.left_minutes > 0">
+            <td colspan='2'>&#160;</td>
+          </t>
+        </t>
+        <t t-if="!room.sum_paid_info">
+          <td colspan='3'>&#160;</td>
+        </t>
+      </tr>
+      <tr>
+        <td>
+          &#160;
+          <!--显示会员标志-->
+          <t t-if="room.sum_paid_info and room.sum_paid_info.last_member_id" >
+            <i class='icon-user'></i>
+          </t>
+        </td>
+        <td>
+          <!--买断-->
+          <t t-if="room.sum_paid_info and room.sum_paid_info.last_buyout_config_id" >
+            <i class='icon-flag'></i>
+          </t>
+        </td>
+        <td>
+
+          <t t-if="room.sum_paid_info and room.sum_paid_info.alert" >
+            <i class='icon-bell'></i>
+          </t>
+        </td>
+      </tr>
+    </table>
+  </t>
+<!--包厢状态-->
+    <!--#空闲、使用、预订、锁定、已结帐、买断、故障、呼叫?、提醒?、带客、清洁、调试 -->
+    <!--'free', 'in_use', 'scheduled', 'locked', 'checkout', 'buyout', 'malfunction', 'visit', 'clean', 'debug' -->
+    <t t-name="room-status-template">
+      <div class="room-status-bar">
+        <span class="label">房态汇总:</span>
+        <span class="badge">空闲:<t t-esc="free"/></span>
+        <span class="badge">使用:<t t-esc="in_use"/></span>
+        <span class="badge">预定:<t t-esc="scheduled"/></span>
+        <span class="badge">锁定:<t t-esc="locked"/></span>
+        <span class="badge">结账:<t t-esc="checkout"/></span>
+        <span class="badge">买断:<t t-esc="buyout"/></span>
+        <span class="badge">买钟:<t t-esc="buyout"/></span>
+        <span class="badge">故障:<t t-esc="malfunction"/></span>
+        <span class="badge">带客:<t t-esc="visit"/></span>
+        <span class="badge">清洁:<t t-esc="clean"/></span>
+        <span class="badge">调试:<t t-esc="debug"/></span>
+      </div>
+    </t>
+
+    <!--room filter-->
+    <t t-name="room-filter">
+      <!--包厢状态-->
+      <div class="btn-toolbar">
+        <div class='btn-group'>
+          <button class='btn btn-room-state-filter active' data-room-state="-1">所有状态</button>
+          <button class='btn btn-room-state-filter' data-room-state="free">
+            空闲
+            <span class="badge room-count-free"></span>
+          </button>
+          <button class='btn btn-room-state-filter' data-room-state="in_use">
+            使用
+            <span class="badge room-count-in_use"></span>
+          </button>
+          <button class='btn btn-room-state-filter' data-room-state="scheduled">
+            预定
+            <span class="badge room-count-scheduled"></span>
+          </button>
+          <button class='btn btn-room-state-filter' data-room-state="checkout">
+            已结账
+            <span class="badge room-count-checkout"></span>
+          </button>
+          <button class='btn btn-room-state-filter' data-room-state="buyout">
+            买断
+            <span class="badge room-count-buyout"></span>
+          </button>
+          <button class='btn btn-room-state-filter' data-room-state="buytime">
+            买钟
+            <span class="badge room-count-buytime"></span>
+          </button>
+          <button class='btn btn-room-state-filter' data-room-state="visit">
+            带客
+            <span class="badge room-count-visit"></span>
+          </button>
+
+          <button class='btn btn-room-state-filter' data-room-state="locked">
+            锁定
+            <span class="badge room-count-locked"></span>
+          </button>
+
+          <button class='btn btn-room-state-filter' data-room-state="malfunction">
+            故障
+            <span class="badge room-count-malfunction"></span>
+          </button>
+          <button class='btn btn-room-state-filter' data-room-state="clean">
+            清洁
+            <span class="badge room-count-clean"></span>
+          </button>
+          <button class="btn btn-room-state-filter" data-room-state="debug">
+            调试
+            <span class="badge room-count-debug"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class='btn-toolbar'>
+        <!--包厢区域-->
+        <div class='btn-group'>
+          <button class='btn btn-room-area-filter active' data-room-area-id="-1">全部区域</button>
+          <t t-foreach="room_areas" t-as="room_area">
+            <button class='btn btn-room-area-filter' t-att-data-room-area-id="room_area.id"><t t-esc="room_area.name" /></button>
+          </t>
+        </div>
+
+        <!--包厢类别-->
+        <div class='btn-group'>
+          <button class='btn btn-room-type-filter active' data-room-type-id="-1">全部类别</button>
+          <t t-foreach="room_types" t-as="room_type">
+            <button class='btn btn-room-type-filter' t-att-data-room-type-id="room_type.id"><t t-esc="room_type.name" /></button>
+          </t>
+        </div>
+
+      </div>
+
+    </t>
+
+    <t t-name='room-scheduled-form-partial-template'>
+      <form class="form-horizontal" id="room_scheduled_form">
+        <div class="row">
+          <div class="control-group pull-left">
+            <label class="control-label" for="room_id">包厢名称:</label>
+            <div class="controls">
+              <select id='room_id' name='room_id'>
+                <t t-foreach='rooms' t-as='r'>
+                  <option t-att-value='r.id'><t t-esc='r.name' /></option>
+                </t>
+              </select>
+            </div>
+          </div>
+          <div class="control-group pull-left">
+            <label class="control-label" for="saler_id">销售经理:</label>
+            <div class="controls">
+              <select id='saler_id' name='saler_id'>
+                <t t-foreach='users' t-as='u'>
+                  <option t-att-value='u.id'><t t-esc='u.name' /></option>
+                </t>
+              </select>
+            </div>
+          </div>
+
+        </div>
+        <div class="row">
+          <div class="control-group pull-left">
+            <label class="control-label" for="guest_name">预定人:</label>
+            <div class="controls">
+              <input type="text" class="required" id="guest_name" name="guest_name" t-att-value='model.guest_name' />
+            </div>
+          </div>
+
+          <div class="control-group pull-left">
+            <label class="control-label" for="scheduled_time">预定时间:</label>
+            <div class="controls scheduled_time" name="scheduled_time">
+              <input type="text" class="required" id="scheduled_time" name="scheduled_time" t-att-value="model.scheduled_time"/>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="control-group pull-left">
+            <label class="control-label" for="guest_phone">联系电话:</label>
+            <div class="controls">
+              <input type="text" class="required" id="guest_phone" name="guest_phone" t-att-value='model.guest_phone'/>
+            </div>
+          </div>
+          <div class="control-group pull-left">
+            <label class="control-label" for="persons_count">人数:</label>
+            <div class="controls">
+              <input type="text" id="persons_count" class="number" name="persons_count" t-att-value='model.persons_count'/>
+            </div>
+          </div>
+        </div>
+      </form>
+    </t>
+    <!--预定信息显示-->
+    <t t-name='room-scheduled-show-template'>
+      <table class='table table-striped table-bordered'>
+        <tr>
+          <td>包厢名称:</td>
+          <td><t t-esc='model.room_id[1]' /></td>
+          <td>销售经理:</td>
+          <td><t t-esc='model.saler_id[1]' /></td>
+        </tr>
+        <tr>
+          <td>预定人:</td>
+          <td><t t-esc='model.guest_name' /></td>
+          <td>预定时间:</td>
+          <td><t t-esc='model.context_scheduled_time' /></td>
+        </tr>
+         <tr>
+          <td>客人人数:</td>
+          <td><t t-esc='model.persons_count' /></td>
+          <td>联系电话:</td>
+          <td><t t-esc='model.guest_phone' /></td>
+        </tr>
+      </table>
+    </t>
+    <!--包厢预定-->
+    <t t-name="room-scheduled-form-template">
+      <div class="well well-small">
+        <div class="modal-header">
+          <button type="button" class="close btn-close-room-scheduled">&#x00D7;</button>
+          <h4>预定</h4>
+        </div>
+        <div class="modal-body">
+          <t t-call='room-scheduled-form-partial-template' />
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-save"><i class="icon-check"></i> 保存预定信息</button>
+          <button class="btn btn-close-room-scheduled"><i class='icon-arrow-right'></i> 取消</button>
+        </div>
+      </div>
+    </t>
+    <!--正常开房界面room_opens-->
+    <t t-name="room-opens-template">
+      <div class="well well-small">
+        <div class="modal-header">
+          <button type="button" class="close btn-close-room-opens" data-dismiss="modal" aria-hidden="true">&#x00D7;</button>
+          <h4>开房</h4>
+        </div>
+        <div class="modal-body">
+          <form class="form-horizontal" id="room_opens_form">
+            <fieldset>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <label class="control-label" for="room_id">包厢名称:</label>
+                  <div class="controls">
+                    <select id="room_id" name="room_id">
+                      <t t-foreach="rooms" t-as="r">
+                        <option t-att-value="r.id"><t t-esc="r.name"/></option>
+                      </t>
+                    </select>
+                  </div>
+                </div>
+                <div class="control-group pull-left">
+                  <label class="control-label" for="saler_id">销售经理:</label>
+                  <div class="controls">
+                    <select id='saler_id' name='saler_id'>
+                      <t t-foreach='users' t-as='u'>
+                        <option t-att-value='u.id'><t t-esc='u.name' /></option>
+                      </t>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="control-group info pull-left">
+                  <label class="control-label" for="guest_name">客人姓名:</label>
+                  <div class="controls">
+                    <input type="text" id="guest_name" name="guest_name" t-att-value='model.guest_name' />
+                  </div>
+                </div>
+                <div class="control-group info pull-left">
+                  <label class="control-label" for="persons_count">客人人数:</label>
+                  <div class="controls">
+                    <input type="text" id="persons_count" name="persons_count" class="number" t-att-value="model.persons_count" />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <div class="row">
+                <div class="control-group info pull-left">
+                  <label class="control-label" for="fee_type_id">计费方式:</label>
+                  <div class="controls">
+                    <select id="fee_type_id" name="fee_type_id">
+                      <t t-foreach="fee_types" t-as="f">
+                        <option t-att-value="f.id"><t t-esc="f.name"/></option>
+                      </t>
+                    </select>
+                  </div>
+                </div>
+                <div class="control-group info pull-left">
+                  <label class="control-label" for="price_class_id">价格类型:</label>
+                  <div class="controls">
+                    <select id="price_class_id" name="price_class_id">
+                      <t t-foreach="price_classes" t-as="p">
+                        <option t-att-value="p.id"><t t-esc="p.name"/></option>
+                      </t>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
+            <div class="row">
+              <div class="control-group pull-left">
+                <label class="control-label" for="prepay_fee">预收款:</label>
+                <div class="controls">
+                  <input type="text" id="prepay_fee" name="prepay_fee" class="number" t-att-value="model.prepay_fee" />
+                </div>
+              </div>
+            </div>
+            <fieldset>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <div class="controls">
+                    <div class='hide member-card-wrapper'>
+                      <div class="input-prepend input-append">
+                        <span class='add-on'>会员卡</span>
+                        <span id="member-card-no" class="input-xlarge uneditable-input"></span>
+                        <div class="btn-group">
+                          <button class="btn btn-member-card-clear btn-warning" type="button"><i class='icon-remove'></i></button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-member-card-read"><i class='icon-user'></i> 会员卡</button>
+          <button class="btn btn-save-room-opens"><i class='icon-check'></i> 开房</button>
+          <button class="btn btn-close-room-opens" data-dismiss="modal" aria-hidden="true"><i class='icon-arrow-right'></i> 取消</button>
+        </div>
+      </div>
+    </t>
+    <!--换房-正常开房界面room_change -->
+    <t t-name="room-change-template">
+      <div class="well well-small">
+        <div class="modal-header">
+          <button type="button" class="close btn-close-room-change" data-dismiss="modal" aria-hidden="true">&#x00D7;</button>
+          <h4>换房</h4>
+        </div>
+        <div class="modal-body">
+          <form class="form-horizontal" id="room_change_form">
+            <fieldset>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <label class="control-label" for="room_id">原包厢名称:</label>
+                  <div class="controls">
+                    <input id="room_name" name="room_name" type='text' t-att-value="room.name" disabled="true" />
+                  </div>
+                </div>
+                <div class="control-group pull-left">
+                  <label class="control-label" for="hourly_fee">原钟点费:</label>
+                  <div class="controls">
+                    <input type="text" id="hourly_fee" name="hourly_fee" t-att-value="room_fee_info.hourly_fee" disabled="true"/>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <label class="control-label" for="room_fee">原包厢费:</label>
+                  <div class="controls">
+                    <input id="room_fee" name="room_fee" type='text' t-att-value="room_fee_info.room_fee" disabled="true" />
+                  </div>
+                </div>
+                <div class="control-group pull-left">
+                  <label class="control-label" for="minimum_fee">原最低消费:</label>
+                  <div class="controls">
+                    <input type="text" id="minimum_fee" name="minimum_fee" t-att-value="room_fee_info.minimum_fee" disabled="true" />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            <hr/>
+            <fieldset>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <label class="control-label" for="room_id">新包厢名称:</label>
+                  <div class="controls">
+                    <select id="changed_room_id" name="changed_room_id">
+                      <t t-foreach="rooms" t-as="r">
+                        <option t-att-value="r.id"><t t-esc="r.name"/></option>
+                      </t>
+                    </select>
+                  </div>
+                </div>
+                <div class="control-group pull-left">
+                  <label class="control-label" for="changed_hourly_fee">新钟点费:</label>
+                  <div class="controls">
+                    <input type="text" id="changed_hourly_fee" name="chagned_hourly_fee" disabled="true"/>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <label class="control-label" for="changed_room_fee">新包厢费:</label>
+                  <div class="controls">
+                    <input id="changed_room_fee" name="changed_room_fee" type='text' disabled="true" />
+                  </div>
+                </div>
+                <div class="control-group pull-left">
+                  <label class="control-label" for="changed_minimum_fee">新最低消费:</label>
+                  <div class="controls">
+                    <input type="text" id="changed_minimum_fee" name="changed_minimum_fee" disabled="true" />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-save-room-change"><i class='icon-check'></i> 换房</button>
+          <button class="btn btn-close-room-change" data-dismiss="modal" aria-hidden="true"><i class='icon-arrow-right'></i> 取消</button>
+        </div>
+      </div>
+    </t>
+
+    <!--结账 partial -->
+    <t t-name="room-checkout-partial">
+      <table class='table table-striped table-condensed table-hover'>
+        <caption><h4>当前房费一览表</h4></caption>
+        <tr>
+          <th>起止时间:</th>
+          <td colspan='4'>
+            <span class='open_time'></span>
+            ~
+            <span class='close_time'></span>
+          </td>
+          <th>消费时长:</th>
+          <td><span class='consume_minutes'>0</span>分钟</td>
+          <th>赠送时长:</th>
+          <td><span class='present_minutes'>0</span>分钟</td>
+          <th>合计时长:</th>
+          <td><span class='total_minutes'>0</span>分钟</td>
+        </tr>
+        <tr>
+          <th>预付费</th>
+          <th>包厢费</th>
+          <th>钟点费</th>
+          <th>换房包厢费</th>
+          <th>换房钟点费/消费时长</th>
+          <th>并房包厢费</th>
+          <th>并房钟点费</th>
+          <th>服务费/费率</th>
+          <th>合计</th>
+          <th>打折费/折扣</th>
+          <th>应收合计</th>
+        </tr>
+        <tr>
+          <td><span class="prepay_fee"></span></td>
+          <td><span class="room_fee"></span></td>
+          <td><span class='hourly_fee'></span></td>
+          <td><span class='changed_room_fee'></span></td>
+          <td>
+            <span class='changed_room_hourly_fee'></span>/
+            <span class='changed_room_minutes'></span>分钟
+          </td>
+          <td><span class='merged_room_hourly_fee'></span></td>
+          <td><span class='merged_room_hourly_fee'></span></td>
+          <td>
+            <span class='service_fee'></span>/
+            <span class='service_fee_rate'></span>%
+          </td>
+          <td><span class='total_fee'></span></td>
+          <td>
+            <span class='total_discount_fee'></span>/
+            <span class='discount_rate'></span>%
+          </td>
+          <td><span class='label label-important total_after_discount_fee'></span></td>
+        </tr>
+
+        <tr class='hide member-card-wrapper'>
+          <td colspan='11'>
+            <div class="input-prepend input-append">
+              <span class='add-on'>会员卡:</span>
+              <span id="member-card-no" class="input-xlarge uneditable-input"></span>
+              <div class="btn-group">
+                <button class="btn btn-member-card-clear btn-warning" type="button"><i class='icon-remove'></i></button>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr class='hide credit-card-wrapper'>
+          <td colspan='10'>
+            <div class="input-prepend input-append">
+              <span class='add-on'>信用卡:</span>
+              <span id="credit-card-no" class="input-xlarge uneditable-input"></span>
+              <div class="btn-group">
+                <button class="btn btn-credit-card-clear btn-warning" type="button"><i class='icon-remove'></i></button>
+              </div>
+            </div>
+          </td>
+        </tr>
+
+        <tr class='hide discount-card-wrapper'>
+          <td colspan='10'>
+            <div class="input-prepend input-append">
+              <span class='add-on'>打折卡:</span>
+              <span id="discount-card-no" class="input-xlarge uneditable-input"></span>
+              <div class="btn-group">
+                <button class="btn btn-discount-card-clear btn-warning" type="button"><i class='icon-remove'></i></button>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr class='hide discounter-name-wrapper'>
+          <td colspan='10'>
+            <div class="input-prepend input-append">
+              <span class='add-on'>打折:</span>
+              <span id="discounter-name" class="input-xlarge uneditable-input"></span>
+              <div class="btn-group">
+                <button class="btn btn-discounter-clear btn-warning" type="button"><i class='icon-remove'></i></button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </table>
+      <div class='sales-voucher-list'></div>
+      <table class='table table-condensed'>
+        <tr>
+          <td>
+            <div class='input-prepend'>
+              <span class='add-on'>现金:</span>
+              <input type='text' class='total_after_discount_cash_fee input-mini' disabled='true'/>
+            </div>
+          </td>
+          <td>
+            <div class='input-prepend input-append'>
+              <span class='add-on'>会员卡:</span>
+              <input type='text' class='member_card_fee input-mini' disabled='true'/>
+              <span class='add-on'>
+                余:<span class='member_card_balance'>0.0</span>元
+                <span class="member-card-balance-warning label label-important hide">余额不足!</span>
+              </span>
+
+            </div>
+          </td>
+          <td>
+            <div class='input-prepend input-append'>
+              <span class='add-on'>信用卡:</span>
+              <input type='text' class='credit_card_fee input-mini' disabled='true'/>
+              <div class='btn-group'>
+                <button class="btn btn-credit-card-input"><i class='icon-tasks'></i> 刷卡</button>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class='input-append input-prepend'>
+              <span class='add-on'>抵用券:</span>
+              <input type='text' class='sales_voucher_fee input-mini' disabled='true'/>
+              <div class='btn-group'>
+                <button class="btn btn-sales-voucher-input"><i class='icon-file'></i> 录入</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="input-prepend input-append">
+              <span class='add-on'>挂账:</span>
+              <input type='text' class='on-credit-fee input-mini' disabled='true'/>
+              <span class='add-on'>
+                <span>&lt;=</span>
+                <span class='on-credit-fee-limit'>0</span>元
+                <span class="on-credit-fee-warning label label-important hide">!</span>
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="input-prepend input-append">
+              <span class='add-on'>免单:</span>
+              <input type='text' class='free-fee input-mini' disabled='true'/>
+              <span class='add-on'>
+                <span>&lt;=</span>
+                <span class='free-fee-limit'>0</span>元
+                <span class="free-fee-warning label label-important hide">!</span>
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="input-prepend input-append">
+              <span class='add-on'>员工打折:</span>
+              <input type='text' class='discounter-room-fee-discount-rate input-mini' disabled='true'/>
+              <span class='add-on'>
+                <span>&gt;=</span>
+                <span class='min-room-fee-discount-rate'>100</span>折
+              </span>
+              <span class='add-on'>
+                <span class='discounter-room-fee-discount-fee'></span>
+                <span class="discounter-room-fee-warning label label-important hide">!</span>
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class='input-append'>
+              <button class="btn btn-danger btn-authorize oe_highlight"><i class='icon-eye-open'></i> 优惠授权</button>
+              <span class='add-on'>
+                <i class='icon-user'></i>
+                <span class='authorize-user'></span>
+              </span>
+              <span class='add-on'>
+                <i class='remove-authorize-user icon-remove-sign hide'></i>
+              </span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan='2'>
+            <div class="input-prepend input-append">
+              <span class='add-on'>实付:</span>
+              <input type='text' class='act_pay_cash_fee input-mini'/>
+            </div>
+          </td>
+          <td colspan='2'>
+            <div class="input-prepend input-append">
+              <span class='add-on'>找零:</span>
+              <span class="cash_change input-mini uneditable-input"></span>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </t>
+
+    <!--抵用券显示-->
+    <t t-name='sales-voucher-template'>
+      <td colspan='10'>
+        <div class="input-prepend input-append">
+          <span class='add-on'>抵用券:</span>
+          <span class="input-xlarge uneditable-input sales-voucher-no">
+            [<t t-esc="id_number"/>]
+            面额:<t t-esc="as_money" />
+          </span>
+          <div class="btn-group">
+            <button class="btn btn-sales-voucher-clear btn-warning" type="button"><i class='icon-remove'></i></button>
+          </div>
+        </div>
+      </td>
+    </t>
+    <!--抵用券列表显示-->
+    <t t-name='sales-voucher-list-template'>
+      <table class='table table-condensed'></table>
+    </t>
+
+    <!--结账操作按钮-->
+    <t t-name='room-checkout-buttons'>
+      <div class="modal-footer">
+        <button class="btn btn-print"><i class='icon-print'></i> 打单</button>
+        <button class="btn btn-member-card-read"><i class='icon-user'></i> 会员卡</button>
+        <button class="btn btn-discount-card-read"><i class='icon-arrow-down'></i> 打折卡</button>
+        <button class="btn btn-checkout"><i class='icon-check'></i> 结账</button>
+        <button class="btn btn-cancel"><i class='icon-arrow-right'></i> 取消</button>
+      </div>
+    </t>
+    <!--换房结账-费用列表显示,显示换房前消费情况及换房后应补费用信息-->
+    <t t-name="room-change-fee-table-template">
+      <table class='table table-striped table-condensed table-hover'>
+        <caption><h4>原房费一览表</h4></caption>
+        <tr>
+          <th>起止时间:</th>
+          <td colspan='7'>
+            <t t-esc="sum_paid_info.context_open_time" />
+            ~
+            <t t-esc="sum_paid_info.context_close_time" />
+          </td>
+          <th>消费时长:</th>
+          <td><t t-esc="sum_paid_info.consume_minutes" />分钟</td>
+        </tr>
+        <tr>
+          <th>包厢费</th>
+          <th>钟点费</th>
+          <th>换房包厢费</th>
+          <th>换房钟点费/消费时长</th>
+          <th>并房包厢费</th>
+          <th>并房钟点费</th>
+          <th>服务费/费率</th>
+          <th>合计</th>
+          <th>打折费/折扣</th>
+          <th>应收合计</th>
+        </tr>
+        <tr>
+          <td><t t-esc="sum_paid_info.room_fee"/></td>
+          <td><t t-esc='sum_paid_info.hourly_fee'/></td>
+          <td><t t-esc="sum_paid_info.changed_room_fee" /></td>
+          <td>
+            <t t-esc="sum_paid_info.changed_room_hourly_fee" />/
+            <t t-esc="sum_paid_info.changed_room_minutes" />分钟
+          </td>
+          <td>
+            <t t-esc="sum_paid_info.merged_room_hourly_fee" />
+          </td>
+          <td>
+            <t t-esc="sum_paid_info.merged_room_hourly_fee" />
+          </td>
+          <td>
+            <t t-esc="sum_paid_info.service_fee" />/
+            <t t-esc="sum_paid_info.service_fee_rate" />%
+          </td>
+          <td>
+            <t t-esc="sum_paid_info.total_fee" />
+          </td>
+          <td>
+            <t t-esc="sum_paid_info.total_discount_fee" />
+          </td>
+          <td>
+            <t t-esc="sum_paid_info.total_after_discount_fee" />
+          </td>
+        </tr>
+        <tr>
+          <th>现金</th>
+          <th colspan="2">会员卡</th>
+          <th colspan="3">信用卡</th>
+          <th>抵扣券</th>
+          <th>挂账</th>
+          <th>免单</th>
+          <th>合计</th>
+        </tr>
+
+        <tr>
+          <td><t t-esc="sum_paid_info.total_after_discount_cash_fee" /></td>
+          <td colspan="2"><t t-esc="sum_paid_info.member_card_fee" />/<t t-esc="sum_paid_info.member"/></td>
+          <td colspan="3"><t t-esc="sum_paid_info.credit_card_fee" />/<t t-esc="sum_paid_info.credit_card_no" /></td>
+          <td><t t-esc="sum_paid_info.sales_voucher_fee" />/<t t-esc="sum_paid_info.sales_vouchers" /></td>
+          <td><t t-esc="sum_paid_info.on_credit_fee" /></td>
+          <td><t t-esc="sum_paid_info.free_fee" /></td>
+          <td><t t-esc="sum_paid_info.total_after_discount_fee" /></td>
+        </tr>
+      </table>
+    </t>
+    <!--包厢操作-买断换房-->
+    <t t-name='room-change-checkout-buyout-template'>
+      <div class='well well-small'>
+        <div class="modal-header">
+          <button type="button" class="close btn-cancel">&#x00D7;</button>
+          <h5>换房-买断</h5>
+        </div>
+        <div class='well well-small'>
+          <form class="form-horizontal" id="room_buyout_form">
+            <fieldset>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <label class="control-label">原包厢:</label>
+                  <div class="controls">
+                    <span class="origin-room-name uneditable-input"><t t-esc="origin_room.name"/></span>
+                  </div>
+                </div>
+                <div class="control-group info pull-left">
+                  <label class="control-label" for="buyout_config_id">原买断:</label>
+                  <div class="controls">
+                    <span class="origin-buyout-config-name uneditable-input"><t t-esc="origin_room.sum_paid_info.last_buyout_config_id[1]"/></span>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="control-group info pull-left">
+                  <label class="control-label">客人姓名:</label>
+                  <div class="controls">
+                    <span class="origin-guest-name uneditable-input"><t t-esc="origin_room.sum_paid_info.guest_name"/></span>
+                  </div>
+                </div>
+                <div class="control-group info pull-left">
+                  <label class="control-label">客人人数:</label>
+                  <div class="controls">
+                    <span class="origin-persons-count uneditable-input"><t t-esc="origin_room.sum_paid_info.persons_count"/></span>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <label class="control-label" for="changed_room_id">新包厢:</label>
+                  <div class="controls">
+                    <select id="changed_room_id" name="changed_room_id">
+                      <t t-foreach="free_rooms" t-as="r">
+                        <option t-att-value="r.id"><t t-esc="r.name"/>[<t t-esc="r.room_type_id[1]"/>]</option>
+                      </t>
+                    </select>
+                  </div>
+                </div>
+                <div class='buyout-select-placeholder'></div>
+              </div>
+            </fieldset>
+          </form>
+          <t t-call='room-change-fee-table-template'>
+            <t t-set="sum_paid_info" t-value="origin_room.sum_paid_info"/>
+          </t>
+          <t t-call='room-checkout-partial'/>
+        </div>
+        <t t-call='room-checkout-buttons'/>
+      </div>
+    </t>
+    <!--包厢买断-->
+    <t t-name="room-buyout-template">
+      <div class='well well-small'>
+        <div class="modal-header">
+          <button type="button" class="close btn-cancel">&#x00D7;</button>
+          <h5>预售-买断</h5>
+        </div>
+        <div class='well well-small'>
+          <form class="form-horizontal" id="room_buyout_form">
+            <fieldset>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <label class="control-label" for="room_id">包厢名称:</label>
+                  <div class="controls">
+                    <span class="input-large uneditable-input"><t t-esc="room.name"/></span>
+                  </div>
+                </div>
+                <div class="control-group pull-left">
+                  <label class="control-label" for="saler_id">销售经理:</label>
+                  <div class="controls">
+                    <select id='saler_id' name='saler_id'>
+                      <t t-foreach='users' t-as='u'>
+                        <option t-att-value='u.id'><t t-esc='u.name' /></option>
+                      </t>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="control-group info pull-left">
+                  <label class="control-label" for="guest_name">客人姓名:</label>
+                  <div class="controls">
+                    <input type="text" id="guest_name" name="guest_name" t-att-value='model.guest_name' />
+                  </div>
+                </div>
+                <div class="control-group info pull-left">
+                  <label class="control-label" for="persons_count">客人人数:</label>
+                  <div class="controls">
+                    <input type="text" id="persons_count" name="persons_count" class="number" t-att-value="model.persons_count" />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset>
+              <div class="row">
+                <div class="control-group info pull-left">
+                  <label class="control-label" for="buyout_config_id">买断名称:</label>
+                  <div class="controls">
+                    <select id="buyout_config_id" name="buyout_config_id" class='span-4'>
+                      <t t-foreach="room_fee_info.active_buyout_config_lines" t-as="l">
+                        <option t-att-value="l.id">
+                          <t t-esc="l.name"/>:
+                          <t t-esc="l.buyout_fee"/>元/
+                          <t t-esc="l.buyout_time"/>分钟
+                          (<t t-esc="l.time_range"/>)
+                          <t t-if="l.is_member">会员专用</t>
+                        </option>
+                      </t>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+          <t t-call='room-checkout-partial'/>
+        </div>
+        <t t-call='room-checkout-buttons'/>
+      </div>
+    </t>
+    <!--买钟-->
+    <t t-name="room-buytime-template">
+      <div class='well well-small'>
+        <div class="modal-header">
+          <button type="button" class="close btn-cancel">&#x00D7;</button>
+          <h5>预售-买钟</h5>
+        </div>
+        <form class="form-horizontal" id="room_buytime_form">
+          <fieldset>
+            <div class="row">
+              <div class="control-group pull-left">
+                  <label class="control-label" for="room_id">包厢名称:</label>
+                  <div class="controls">
+                    <span class="room-name uneditable-input"><t t-esc="room.name"/></span>
+                  </div>
+              </div>
+              <div class="control-group pull-left">
+                <label class="control-label" for="saler_id">销售经理:</label>
+                <div class="controls">
+                  <select id='saler_id' name='saler_id'>
+                    <t t-foreach='users' t-as='u'>
+                      <option t-att-value='u.id'><t t-esc='u.name' /></option>
+                    </t>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="control-group info pull-left">
+                <label class="control-label" for="guest_name">客人姓名:</label>
+                <div class="controls">
+                  <input type="text" id="guest_name" name="guest_name" t-att-value='model.guest_name' />
+                </div>
+              </div>
+              <div class="control-group info pull-left">
+                <label class="control-label" for="persons_count">客人人数:</label>
+                <div class="controls">
+                  <input type="text" id="persons_count" name="persons_count" class="number" t-att-value="model.persons_count" />
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset>
+            <div class="row">
+              <div class="control-group info pull-left">
+                <label class="control-label" for="price_class_id">价格类型:</label>
+                <div class="controls">
+                  <select id="price_class_id" name="price_class_id">
+                    <t t-foreach="price_classes" t-as="p">
+                      <option t-att-value="p.id"><t t-esc="p.name"/></option>
+                    </t>
+                  </select>
+                </div>
+              </div>
+              <div class="control-group info pull-left">
+                <label class="control-label" for="buy_minutes">买钟时间:</label>
+                <div class="controls">
+                  <select id="consume_minutes" name="consume_minutes">
+                    <option value="30">30分钟</option>
+                    <option value="60">60分钟</option>
+                    <option value="90">90分钟</option>
+                    <option value="120">120分钟</option>
+                    <option value="150">150分钟</option>
+                    <option value="180">180分钟</option>
+                    <option value="210">210分钟</option>
+                    <option value="240">240分钟</option>
+                    <option value="270">270分钟</option>
+                    <option value="300">300分钟</option>
+                    <option value="330">330分钟</option>
+                    <option value="360">360分钟</option>
+                    <option value="390">390分钟</option>
+                    <option value="420">420分钟</option>
+                    <option value="450">450分钟</option>
+                    <option value="480">480分钟</option>
+                    <option value="510">510分钟</option>
+                    <option value="540">540分钟</option>
+                    <option value="570">570分钟</option>
+                    <option value="600">600分钟</option>
+                  </select>
+                </div>
+              </div>
+
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <div class="row">
+              <div class="control-group pull-left">
+                <label class="control-label" for="present_minutes">赠送时长:</label>
+                <div class="controls">
+                  <div class='input-append'>
+                    <input name="present_minutes" id="present_minutes" class='input-medium' type='text' disabled = "true" />&#x00A0;
+                    <span class='add-on'>
+                      <span>分钟</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="control-group info pull-left">
+                <label class="control-label" for="close_time">到钟时间:</label>
+                <div class="controls">
+                  <input name="close_time" id="close_time" type='text' disabled = "true" />
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+        <t t-call='room-checkout-partial'/>
+        <t t-call='room-checkout-buttons'/>
+      </div>
+    </t>
+    <!--结账-->
+    <t t-name="room-checkout-template">
+      <div class='well well-small'>
+        <div class="modal-header">
+          <button type="button" class="close btn-cancel">&#x00D7;</button>
+          <h5>结账</h5>
+        </div>
+        <form class="form-horizontal" id="room_buytime_form">
+          <fieldset>
+            <div class="row">
+              <div class="control-group pull-left">
+                <label class="control-label" for="room_id">包厢名称:</label>
+                <div class="controls">
+                  <span class="input-large uneditable-input"><t t-esc="room.name"/></span>
+                </div>
+              </div>
+              <div class="control-group pull-left">
+                <label class="control-label" for="saler_id">销售经理:</label>
+                <div class="controls">
+                  <input type="text" id="saler_id" name="saler_id" placeholder="选择销售经理" />
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="control-group info pull-left">
+                <label class="control-label" for="guest_name">客人姓名:</label>
+                <div class="controls">
+                  <input type="text" id="guest_name" name="guest_name" />
+                </div>
+              </div>
+              <div class="control-group info pull-left">
+                <label class="control-label" for="persons_count">客人人数:</label>
+                <div class="controls">
+                  <input type="text" id="persons_count" name="persons_count" class="number" t-att-value="model.persons_count" />
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset>
+            <div class="row">
+              <div class="control-group info pull-left">
+                <label class="control-label" for="fee_type_id">计费方式:</label>
+                <div class="controls">
+                  <select id="fee_type_id" name="fee_type_id">
+                    <t t-foreach="fee_types" t-as="f">
+                      <option t-att-value="f.id"><t t-esc="f.name"/></option>
+                    </t>
+                  </select>
+                </div>
+              </div>
+              <div class="control-group info pull-left">
+                <label class="control-label" for="price_class_id">价格类型:</label>
+                <div class="controls">
+                  <select id="price_class_id" name="price_class_id">
+                    <t t-foreach="price_classes" t-as="p">
+                      <option t-att-value="p.id"><t t-esc="p.name"/></option>
+                    </t>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+        <t t-call='room-checkout-partial'/>
+        <t t-call='room-checkout-buttons'/>
+      </div>
+    </t>
+
+    <!--包厢操作-买钟换房-->
+    <t t-name='room-change-checkout-buytime-template'>
+      <div class='well well-small'>
+        <div class="modal-header">
+          <button type="button" class="close btn-cancel">&#x00D7;</button>
+          <h5>换房-买钟</h5>
+        </div>
+        <div class='well well-small'>
+          <form class="form-horizontal" id="room_buyout_form">
+            <fieldset>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <label class="control-label">原包厢:</label>
+                  <div class="controls">
+                    <span class="origin-room-name uneditable-input"><t t-esc="origin_room.name"/></span>
+                  </div>
+                </div>
+                <div class="control-group pull-left">
+                  <label class="control-label" for="changed_room_id">新包厢:</label>
+                  <div class="controls">
+                    <select id="changed_room_id" name="changed_room_id">
+                      <t t-foreach="free_rooms" t-as="r">
+                        <option t-att-value="r.id"><t t-esc="r.name"/>[<t t-esc="r.room_type_id[1]"/>]</option>
+                      </t>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="control-group info pull-left">
+                  <label class="control-label">客人姓名:</label>
+                  <div class="controls">
+                    <span class="origin-guest-name uneditable-input"><t t-esc="origin_room.sum_paid_info.guest_name"/></span>
+                  </div>
+                </div>
+                <div class="control-group info pull-left">
+                  <label class="control-label">客人人数:</label>
+                  <div class="controls">
+                    <span class="origin-persons-count uneditable-input"><t t-esc="origin_room.sum_paid_info.persons_count"/></span>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="control-group info pull-left">
+                  <label class="control-label">价格类型:</label>
+                  <div class="controls">
+                    <span class="uneditable-input"><t t-esc="origin_room.sum_paid_info.price_class_id[1]"/></span>
+                  </div>
+                </div>
+
+              </div>
+            </fieldset>
+          </form>
+          <t t-call='room-change-fee-table-template'>
+            <t t-set="sum_paid_info" t-value="origin_room.sum_paid_info"/>
+          </t>
+          <t t-call='room-checkout-partial'/>
+        </div>
+        <t t-call='room-checkout-buttons'/>
+      </div>
+    </t>
+
+    <!--包厢操作-续钟-->
+    <t t-name='room-checkout-buytime-continue-template'>
+      <div class='well well-small'>
+        <div class="modal-header">
+          <button type="button" class="close btn-cancel">&#x00D7;</button>
+          <h5>续钟操作</h5>
+        </div>
+        <div class='well well-small'>
+          <form class="form-horizontal" onsubmit="return false;" id="room_buytime_continue_form">
+            <fieldset>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <label class="control-label">包厢名称:</label>
+                  <div class="controls">
+                    <span class="room-name uneditable-input"><t t-esc="room.name"/></span>
+                  </div>
+                </div>
+                <div class="control-group info pull-left">
+                  <label class="control-label">销售经理:</label>
+                  <div class="controls">
+                    <span class="saler-name uneditable-input"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="control-group info pull-left">
+                  <label class="control-label">客人姓名:</label>
+                  <div class="controls">
+                    <span class="guest-name uneditable-input"><t t-esc="room.sum_paid_info.guest_name"/></span>
+                  </div>
+                </div>
+                <div class="control-group info pull-left">
+                  <label class="control-label">续钟时间:</label>
+                  <div class="controls">
+                    <input  type="text" id="consume_minutes" name='consume_minutes' class="consume_minutes" value="30"></input>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+          <t t-call='room-change-fee-table-template'>
+            <t t-set="sum_paid_info" t-value="room.sum_paid_info" />
+          </t>
+          <t t-call='room-checkout-partial'/>
+        </div>
+        <t t-call='room-checkout-buttons'/>
+      </div>
+    </t>
+
+    <!--包厢操作-退钟-->
+    <t t-name='room-checkout-buytime-refund-template'>
+      <div class='well well-small'>
+        <div class="modal-header">
+          <button type="button" class="close btn-cancel">&#x00D7;</button>
+          <h5>退钟操作</h5>
+        </div>
+        <div class='well well-small'>
+          <form class="form-horizontal" onsubmit="return false;" id="room_buytime_refund_form">
+            <fieldset>
+              <div class="row">
+                <div class="control-group pull-left">
+                  <label class="control-label">包厢名称:</label>
+                  <div class="controls">
+                    <span class="room-name uneditable-input"><t t-esc="room.name"/></span>
+                  </div>
+                </div>
+                <div class="control-group info pull-left">
+                  <label class="control-label">销售经理:</label>
+                  <div class="controls">
+                    <span class="saler-name uneditable-input"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="control-group info pull-left">
+                  <label class="control-label">客人姓名:</label>
+                  <div class="controls">
+                    <span class="guest-name uneditable-input"><t t-esc="room.sum_paid_info.guest_name"/></span>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+          <t t-call='room-change-fee-table-template'>
+            <t t-set="sum_paid_info" t-value="room.sum_paid_info"/>
+          </t>
+          <table class='table'>
+            <tr>
+              <th>退钟时间:</th>
+              <td colspan='5'><span class='open_time'></span> ~ <span class='close_time'></span></td>
+              <th>退钟时长:</th>
+              <td><span class='consume_minutes'>0.0</span>分钟</td>
+              <th>退费合计:</th>
+              <td><span class='total_fee'>0.0</span></td>
+            </tr>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-checkout"><i class='icon-check'></i> 退钟</button>
+          <button class="btn btn-cancel"><i class='icon-arrow-right'></i> 取消</button>
+        </div>
+      </div>
+    </t>
+
+    <!--读取会员卡界面-->
+    <t t-name="scan-card-template">
+      <div class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#x00D7;</button>
+          <h4>刷卡</h4>
+        </div>
+        <div class="modal-body">
+          <div id="member_read_form" class="form-search">
+            <div class="alert hide">
+              <strong>!</strong> 未找到卡信息.
+            </div>
+            <div class='input-append'>
+              <input type="text" id="input_hide" autocomplete='off'/>
+              <input type="text" id="input_card_no" autocomplete='off' class="input-xlarge search-query"/>
+              <div class="btn-group">
+                <button id="btn_search" class="btn"><i class='icon-search'></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </t>
+
+    <!--录入member card password-->
+    <t t-name="member-card-password-template">
+      <div class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="输入会员卡密码" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#x00D7;</button>
+          <h4>输入密码</h4>
+        </div>
+        <div class="modal-body">
+          <div id="member_read_form" class="form-search">
+            <div class="alert hide">
+              <strong>!</strong> 密码不正确.
+            </div>
+            <div class='input-append'>
+              <input type="password" autocomplete='off' class="input-xlarge search-query input-password"/>
+              <div class="btn-group">
+                <button class="btn btn-ok"><i class='icon-check'></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </t>
+
+    <!--用户授权界面-->
+    <t t-name="user-authorize-template">
+      <div class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="操作授权" aria-hidden="true">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&#x00D7;</button>
+          <h4>操作授权</h4>
+        </div>
+        <div class="modal-body">
+          <div>
+            <div class="alert hide">
+              <strong>!</strong> 用户名或密码不正确.
+            </div>
+            <div class='control-group'>
+              <div class='controls'>
+                <input type="text" autocomplete='off' name='username' placeholder='用户名' class="input-xlarge input-username"/>
+              </div>
+            </div>
+
+            <div class='control-group'>
+              <div class='controls'>
+                <input type="password" autocomplete='off' name='password' placeholder = '密码' class="input-xlarge input-password"/>
+              </div>
+            </div>
+
+            <div style='text-align : center;'>
+              <button class="btn btn-ok"><i class='icon-check'> </i> 确定</button>
+              <button class="btn btn-cancel"><i class='icon-remove-sign'></i> 取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </t>
+
+
+
+    <!--包厢信息的包装对象,将包厢信息、包厢费用信息、消费信息等界面组装到一起-->
+    <t t-name="room-info-wrapper-template">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#room_info" data-toggle="tab">包厢信息</a></li>
+        <li><a href="#operate_tab" data-toggle="tab">其他操作</a></li>
+      </ul>
+      <div class="tab-content well">
+        <div class="tab-pane active" id="room_info">
+          <t t-call="room-table-template">
+            <t t-set="room_info" t-value="room_info"/>
+          </t>
+          <t t-call="room-fee-info-template">
+            <t t-set="room_fee_info" t-value="room_fee_info"/>
+          </t>
+          <hr/>
+          <button class="btn btn-primary btn-block btn-room-scheduled-list" href="#"> 预定清单</button>
+          <button class="btn btn-primary btn-block btn-casher-shift-report" href="#"> 收银员交接单</button>
+        </div>
+      </div>
+    </t>
+    <!---包厢列表信息-->
+    <t t-name="room-table-template">
+      <table class="table table-condensed table-striped table-hover table-room-fee-info">
+        <tr>
+          <td>包厢名称:</td>
+          <td><t t-esc="room_info.name"/></td>
+        </tr>
+        <tr>
+          <td>包厢类型:</td>
+          <td><t t-esc="room_info.room_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>计费方式:</td>
+          <td><t t-esc="room_info.fee_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>预 定 人:</td>
+          <td><t t-esc="guest_name"/></td>
+        </tr>
+        <tr>
+          <td>预定备注:</td>
+          <td><t t-esc="guest_name"/></td>
+        </tr>
+        <tr>
+          <td>客人姓名:</td>
+          <td><t t-esc="guest_name"/></td>
+        </tr>
+        <tr>
+          <td>客人人数:</td>
+          <td><t t-esc="guest_name"/></td>
+        </tr>
+        <tr>
+          <td>低消差额:</td>
+          <td><t t-esc="guest_name"/></td>
+        </tr>
+        <tr>
+          <td>消费时长:</td>
+          <td><t t-esc="guest_name"/></td>
+        </tr>
+        <tr>
+          <td>消费金额:</td>
+          <td><t t-esc="guest_name"/></td>
+        </tr>
+      </table>
+    </t>
+    <!--包厢费用列表-->
+    <t t-name="room-fee-info-template">
+      <table class="table table-condensed table-striped table-hover table-room-fee-info">
+        <tbody>
+          <tr class="room_fee">
+            <th>包厢费:</th>
+            <td colspan="2"><t t-esc="room_fee_info.room_fee"/></td>
+          </tr>
+          <tr class="minimum_fee">
+            <th>最低消费:</th>
+            <td colspan="2"><t t-esc="room_fee_info.minimum_fee"/></td>
+          </tr>
+          <tr class="minimum_fee_p">
+            <th>按位低消:</th>
+            <td colspan="2"><t t-esc="room_fee_info.minimum_fee_p"/></td>
+          </tr>
+          <tr class="hourly_fee_lines">
+            <th colspan="3">钟点优惠</th>
+          </tr>
+
+          <tr class="hourly_fee_lines">
+            <th>时段</th>
+            <th>折扣</th>
+            <th>钟点费/小时</th>
+          </tr>
+          <t t-foreach="room_fee_info.all_hourly_fee_lines" t-as="l">
+            <tr class="hourly_fee_lines" t-att-data-price-class-id="l.price_class_id" t-att-data-member-class-id="l.member_class_id">
+              <td><t t-esc="l.time_range"/></td>
+              <td><t t-esc="l.hourly_discount"/></td>
+              <td>
+                <t t-esc="l.hourly_fee"/>
+                <t t-if="l.price_class_id > 0">
+                  [<t t-esc="l.price_class_name" />]
+                </t>
+              </td>
+            </tr>
+          </t>
+          <tr class="member_hourly_fee_lines">
+            <th colspan="3">会员钟点优惠</th>
+          </tr>
+
+          <tr class="member_hourly_fee_lines">
+            <th>时段</th>
+            <th>折扣</th>
+            <th>钟点费/小时</th>
+          </tr>
+          <t t-foreach="room_fee_info.all_member_hourly_fee_lines" t-as="l">
+            <tr class="member_hourly_fee_lines" t-att-data-price-class-id="l.price_class_id" t-att-data-member-class-id="l.member_class_id">
+              <td><t t-esc="l.member_class_name"/>-<t t-esc="l.time_range"/></td>
+              <td><t t-esc="l.hourly_discount"/></td>
+              <td><t t-esc="l.hourly_fee"/>[<t t-esc="l.price_class_name" />]</td>
+            </tr>
+          </t>
+          <tr class="hourly_fee_p_lines">
+            <th colspan="3">按位钟点优惠</th>
+          </tr>
+          <tr class="hourly_fee_p_lines">
+            <th>时段</th>
+            <th>折扣</th>
+            <th>钟点费/小时</th>
+          </tr>
+
+          <t t-foreach="room_fee_info.all_hourly_fee_p_lines" t-as="l">
+            <tr class="hourly_fee_p_lines" t-att-data-price-class-id="l.price_class_id" t-att-data-member-class-id="l.member_class_id">
+              <td><t t-esc="l.time_range"/></td>
+              <td><t t-esc="l.hourly_discount"/></td>
+              <td><t t-esc="l.hourly_fee"/>[<t t-esc="l.price_class_name" />]</td>
+            </tr>
+          </t>
+          <tr class="buyout_config_lines">
+            <th colspan="3">买断设置</th>
+          </tr>
+          <tr class="buyout_config_lines">
+            <th>名称</th>
+            <th>时段</th>
+            <th>分钟/费用</th>
+          </tr>
+
+          <t t-foreach="room_fee_info.active_buyout_config_lines" t-as="l">
+            <tr class="buyout_config_lines">
+              <td><t t-esc="l.name"/></td>
+              <td><t t-esc="l.time_range"/></td>
+              <td><t t-esc="l.buyout_time"/>分钟 <t t-esc="l.buyout_fee"/>元</td>
+            </tr>
+          </t>
+          <tr class="buffet_config_lines">
+            <th colspan="3">自助餐设置</th>
+          </tr>
+
+          <!--自助餐设置-->
+          <tr class="buffet_config_lines">
+            <th>名称</th>
+            <th>时段</th>
+            <th>分钟/费用</th>
+          </tr>
+
+          <t t-foreach="room_fee_info.active_buffet_config_lines" t-as="l">
+            <tr class="buffet_config_lines">
+              <td><t t-esc="l.name"/></td>
+              <td><t t-esc="l.time_range"/></td>
+              <td><t t-esc="l.buyout_time"/>分钟 <t t-esc="l.buyout_fee"/>元 儿童<t t-esc="l.child_buyout_fee"/>元</td>
+            </tr>
+          </t>
+          <!--买钟优惠设置-->
+          <tr class="hourly_fee_promotion_lines">
+            <th colspan="3">买钟优惠设置</th>
+          </tr>
+          <tr class="hourly_fee_promotion_lines">
+            <th>名称</th>
+            <th>购买分钟</th>
+            <th>赠送分钟</th>
+          </tr>
+
+          <t t-foreach="room_fee_info.hourly_fee_promotion_lines" t-as="l">
+            <tr class="hourly_fee_promotion_lines">
+              <td><t t-esc="l.name"/></td>
+              <td><t t-esc="l.buy_minutes"/>分钟</td>
+              <td><t t-esc="l.present_minutes"/>分钟</td>
+            </tr>
+          </t>
+        </tbody>
+      </table>
+    </t>
+
+    <!-- 收银员交接单据 -->
+    <t t-name='casher-shift-report-partial'>
+      <table class='table table-striped table-hover'>
+        <tr><td colspan='4' style='text-align : center;'><h4>收银交接单(<t t-esc='report.shift_name' />)</h4></td></tr>
+        <tr>
+          <td>收银员:</td>
+          <td><t t-esc='username' /></td>
+          <td>打印时间:</td>
+          <td><t t-esc='report.context_print_datetime' /></td>
+        </tr>
+        <tr>
+          <td>起始时间:</td>
+          <td><t t-esc='report.context_start_datetime' /></td>
+          <td>结束时间:</td>
+          <td><t t-esc ='report.context_end_datetime' /></td>
+        </tr>
+        <tr><td colspan='4' style='border-bottom : 2px solid #000;font-weight : bold;'>交班结算</td></tr>
+        <tr>
+          <td>现金:</td>
+          <td><t t-esc='report.cash_fee' /></td>
+          <td>会员卡:</td>
+          <td><t t-esc='report.member_card_fee' /></td>
+        </tr>
+        <tr>
+          <td>支票:</td>
+          <td><t t-esc='report.check_fee' /></td>
+          <td>储值卡:</td>
+          <td><t t-esc='report.store_card_fee' /></td>
+        </tr>
+        <tr>
+          <td>免单:</td>
+          <td><t t-esc='report.free_fee' /></td>
+          <td>信用卡:</td>
+          <td><t t-esc='report.credit_card_fee' /></td>
+        </tr>
+        <tr>
+          <td>挂账:</td>
+          <td><t t-esc='report.on_credit_fee' /></td>
+          <td>抵用券:</td>
+          <td><t t-esc='report.sales_voucher_fee' /></td>
+        </tr>
+        <tr>
+          <td style='font-wight : bold;'>实收</td>
+          <td style='font-wight : bold;' colspan='3'><t t-esc='report.sum_fee' /></td>
+        </tr>
+        <tr><td colspan='4' style='border-bottom : 2px solid #000;font-weight : bold;'>交班信息</td></tr>
+        <tr>
+          <td>前班开台数:</td>
+          <td><t t-esc='report.previous_open_count' /></td>
+          <td>当班开台数:</td>
+          <td><t t-esc='report.current_open_count' /></td>
+        </tr>
+        <tr>
+          <td>前班已结数:</td>
+          <td><t t-esc='report.previous_close_count' /></td>
+          <td>当班已结数:</td>
+          <td><t t-esc='report.current_close_count' /></td>
+        </tr>
+        <tr>
+          <td>前班未结数:</td>
+          <td><t t-esc='report.previous_not_close_count' /></td>
+          <td>当班未结数:</td>
+          <td><t t-esc='report.current_not_close_count' /></td>
+        </tr>
+        <tr>
+          <td>前班账单数:</td>
+          <td><t t-esc='report.previous_bills_count' /></td>
+          <td>当班账单数:</td>
+          <td><t t-esc='report.current_bills_count' /></td>
+        </tr>
+        <tr><td colspan='4' style='border-bottom : 2px solid #000;'></td></tr>
+        <tr>
+          <td>合计开台数:</td>
+          <td><t t-esc='report.sum_open_count' /></td>
+          <td>合计已结数:</td>
+          <td><t t-esc='report.sum_close_count' /></td>
+        </tr>
+        <tr>
+          <td>合计未结数:</td>
+          <td><t t-esc='report.sum_not_close_count' /></td>
+          <td>合计账单数:</td>
+          <td><t t-esc='report.sum_bills_count' /></td>
+        </tr>
+        <tr><td colspan='4' style='border-bottom : 2px solid #000;font-weight : bold;'>会员卡合计</td></tr>
+        <tr>
+          <td>会员卡销售数量:</td>
+          <td><t t-esc='report.member_card_count' /></td>
+          <td>会员卡销售金额:</td>
+          <td><t t-esc='report.new_member_card_fee' /></td>
+        </tr>
+        <tr>
+          <td>会员卡充值金额:</td>
+          <td><t t-esc='report.member_charge_fee' /></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </table>
+    </t>
+
+    <!--收银交接单-->
+    <t t-name="casher-shift-report-template">
+      <div class="well well-small">
+        <div class="modal-header">
+          <button type="button" class="close btn-close-casher-shift-report" data-dismiss="modal" aria-hidden="true">&#x00D7;</button>
+        </div>
+        <t t-call='casher-shift-report-partial' />
+        <div class="modal-footer">
+          <button class="btn btn-print"><i class='icon-print'></i> 打印</button>
+          <button class="btn btn-save-casher-shift-report"><i class='icon-check'></i> 交班确认</button>
+          <button class="btn btn-close-casher-shift-report" data-dismiss="modal" aria-hidden="true"><i class='icon-arrow-right'></i> 关闭</button>
+        </div>
+      </div>
+    </t>
+    <!--日营业额统计表-->
+    <t t-name='daily-report-template'>
+      <div class='well'>
+        <form class="form-inline" onsubmit="return false;">
+          <label for='start_datetime'>起止时间:</label>
+          <input type='text' readonly='true' name= 'start_datetime' class='start_datetime' />
+          <label for='start_datetime'>~</label>
+          <input type='text' name='end_datetime' readonly='true' class='end_datetime' />
+          <button class='btn btn-primary btn-query'> <i class='icon-search'></i>查询</button>
+          <button class='btn btn-primary btn-print'> <i class='icon-print'></i>打印</button>
+        </form>
+        <t t-call='daily-report-print-template' />
+      </div>
+    </t>
+    <!--预定清单-->
+    <t t-name='room-scheduled-list-template'>
+      <div class='well well-small'>
+        <div class="modal-header">
+          <button type="button" class="close btn-close-room-scheduled-list" data-dismiss="modal" aria-hidden="true">&#x00D7;</button>
+          <h4>预定清单</h4>
+        </div>
+        <div class='modal-body'>
+          <form class='form-inline' onsubmit='return false;'>
+            <select class="search-room-id">
+              <option value="">全部包厢</option>
+              <t t-foreach="display_rooms" t-as="r">
+                <option t-att-value="r.id"><t t-esc="r.name"/></option>
+              </t>
+            </select>
+            <input type='text' class='search-guest-name' placeholder='客人姓名'  />
+            <input type='text' class='search-guest-phone' placeholder='联系电话'  />
+            <button class='btn bth-search'><i class='icon-search'></i>查询</button>
+          </form>
+          <table class='table table-striped table-hover'>
+            <thead>
+              <tr>
+                <th>包厢名称</th>
+                <th>预定时间</th>
+                <th>客人姓名</th>
+                <th>人数</th>
+                <th>联系电话</th>
+                <th>销售经理</th>
+                <th>登记时间</th>
+              </tr>
+            </thead>
+            <tbody>
+              <t t-foreach='scheduled_list' t-as='l'>
+                <tr class='room-scheduled-row' t-att-data-room-scheduled-id="l.id">
+                  <td><t t-esc='l.room_id[1]' /></td>
+                  <td><t t-esc='l.context_scheduled_time' /></td>
+                  <td><t t-esc='l.guest_name' /></td>
+                  <td><t t-esc='l.persons_count' /></td>
+                  <td><t t-esc='l.guest_phone' /></td>
+                  <td><t t-esc='l.saler_id[1]' /></td>
+                  <td><t t-esc='l.context_input_time' /></td>
+                </tr>
+              </t>
+            </tbody>
+          </table>
+          <div class='well well-small room-scheduled-form-placeholder'></div>
+        </div>
+        <div class="modal-footer">
+          <div class='pull-left alert alert-error alert-operate'><p></p></div>
+          <button class="btn btn-cancel-room-scheduled"><i class='icon-remove'></i> 撤消预定</button>
+          <div class="btn-group">
+            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+              <i class='icon-check'></i>
+              转开房
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class='btn-room-opens' href='#'>正常开房</a></li>
+              <li><a class='btn-room-checkout-buytime' href='#'>买钟</a></li>
+              <li><a class='btn-room-checkout-buyout' href='#'>买断</a></li>
+            </ul>
+          </div>
+          <button class="btn btn-close-room-scheduled-list" data-dismiss="modal" aria-hidden="true"><i class='icon-arrow-right'></i> 关闭</button>
+        </div>
+      </div>
+    </t>
+  </templates>

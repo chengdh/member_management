@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <record id="view_member_charge_form" model="ir.ui.view">
+      <field name="name">member_management.member_charge_form</field>
+      <field name="model">member_management.member_charge</field>
+      <field name="type">form</field>
+      <field name="arch" type="xml">
+        <form string="member charge" version="7.0">
+          <sheet>
+            <h1>
+              <field name="member_id" string="会员卡号" on_change="onchange_member_id_or_charge_fee(member_id,charge_fee)" />
+            </h1>
+
+            <group>
+              <group>
+                <field name="charge_fee" string="充值金额"  on_change="onchange_member_id_or_charge_fee(member_id,charge_fee)" />
+                <field name="present_charge_fee" string="赠送金额" />
+              </group>
+              <group>
+                <field name="before_charge_balance" string="卡余额" />
+                <field name="after_charge_balance" string="充值后卡余额" />
+                <field name="pay_type_id" string="付款方式"/>
+              </group>
+            </group>
+            <div>
+              <button name='%(action_print_service)d' string="打印充值收据" context="{'osv_name' : 'member_management.member_charge'}" type='action' />
+            </div>
+
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_member_charge_tree" model="ir.ui.view">
+      <field name="name">member_management.member_charge_tree</field>
+      <field name="model">member_management.member_charge</field>
+      <field name="type">tree</field>
+      <field name="arch" type="xml">
+        <tree string="会员充值信息">
+          <field name="member_id" string="会员卡号"/>
+          <field name="charge_fee" string="充值金额"/>
+          <field name="present_charge_fee" string="赠送金额"/>
+          <field name="before_charge_balance" string="卡余额"/>
+          <field name="after_charge_balance" string="充值后卡余额"/>
+          <field name="pay_type_id" string="付款方式"/>
+        </tree>
+      </field>
+    </record>
+
+
+    <record id="action_member_charge" model="ir.actions.act_window">
+      <field name="name">会员卡充值</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">member_management.member_charge</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name='help'>会员卡充值</field>
+    </record>
+    <menuitem action="action_member_charge" id="menu_action_member_charge" parent="menu_members" name="会员卡充值" sequence="5"/>
+  </data>
+</openerp>
+

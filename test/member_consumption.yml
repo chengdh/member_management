@@ -1,0 +1,16 @@
+-
+  测试会员卡消费记录功能
+-
+  !python {model : member_management.member_consumption}: |
+    vals = {'member_id' : ref('member_1'),'paid_fee' : 200.00,'total_paid_fee' : 500.00}
+    member_1 = self.pool.get('ktv.member').browse(cr,uid,ref('member_1'))
+    old_balance = member_1.balance
+    old_points = member_1.points
+    ret = self.create(cr,uid,vals)
+    member_2 = self.pool.get('ktv.member').browse(cr,uid,ref('member_1'))
+    new_balance = member_2.balance
+    new_points = member_2.points
+ 
+    assert ret
+    assert old_balance > new_balance
+    assert old_points < new_points

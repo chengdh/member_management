@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <!--根菜单-->
+    <menuitem id="menu_member_management_root" name="会员卡管理" groups='group_member_manager' sequence="0" />
+    <menuitem id="menu_members" name="会员管理" parent="menu_member_managemetn_root" sequence="6"/>
+  </data>
+</openerp>

@@ -1,0 +1,927 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- vim:fdl=1: -->
+<!--打印相关模版-->
+<templates id="template" xml:space="preserve">
+  <!--开房条-->
+  <t t-name="room-opens-bill-print-template">
+    <div class='room-opens-bill' style='text-align : center;'>
+      <h4><t t-esc="company.name"/>开房条</h4>
+      <table style='width : 100%;'>
+        <tr>
+          <td>房间名称:</td>
+          <td colspan="2"><t t-esc="room.name"/></td>
+        </tr>
+        <tr>
+          <td>房间类型:</td>
+          <td colspan="2"><t t-esc="room.room_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>账 单 号:</td>
+          <td colspan="2"><t t-esc="room.current_room_operate_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>计费方式:</td>
+          <td colspan="2"><t t-esc="room.sum_paid_info.fee_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>价格类型:</td>
+          <td colspan="2"><t t-esc="room.sum_paid_info.price_class_id[1]"/></td>
+        </tr>
+        <tr><td colspan='3' style='border-bottom : 2px solid #000;'></td></tr>
+
+        <t t-if="!room.sum_paid_info.last_member_id">
+          <tr class="hourly_fee_lines">
+            <td>时段</td>
+            <td>折扣</td>
+            <td>钟点费/小时</td>
+          </tr>
+          <t t-foreach="room_fee_info.all_hourly_fee_lines" t-as="l">
+            <tr class="hourly_fee_lines" t-att-data-price-class-id="l.price_class_id" t-att-data-member-class-id="l.member_class_id">
+              <td><t t-esc="l.time_range"/></td>
+              <td><t t-esc="l.hourly_discount"/></td>
+              <td><t t-esc="l.hourly_fee"/></td>
+            </tr>
+          </t>
+        </t>
+        <t t-if="room.sum_paid_info.last_member_id">
+          <tr class="member_hourly_fee_lines">
+            <th>时段</th>
+            <th>折扣</th>
+            <th>钟点费/小时</th>
+          </tr>
+          <t t-foreach="room_fee_info.all_member_hourly_fee_lines" t-as="l">
+            <tr class="member_hourly_fee_lines" t-att-data-price-class-id="l.price_class_id" t-att-data-member-class-id="l.member_class_id">
+              <td><t t-esc="l.member_class_name"/>-<t t-esc="l.time_range"/></td>
+              <td><t t-esc="l.hourly_discount"/></td>
+              <td><t t-esc="l.hourly_fee"/></td>
+            </tr>
+          </t>
+        </t>
+        <tr><td colspan='3' style='border-bottom : 2px solid #000;'></td></tr>
+        <tr>
+          <td>开房人:</td>
+          <td colspan="2"><t t-esc="username"/></td>
+        </tr>
+        <tr>
+          <td>开房时间:</td>
+          <td colspan="2"><t t-esc="room_opens.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td>会员卡号:</td>
+          <td colspan="2"><t t-esc="room.sum_paid_info.last_member_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>客人签名:</td>
+          <td style='border-bottom : 2px solid #000;'>&#160;</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td colspan="3">请确认房号及所有设备完整,谢谢!</td>
+        </tr>
+      </table>
+    </div>
+  </t>
+  <!--结账条-->
+  <t t-name="room-checkout-print-template">
+    <div class='room-opens-bill' style='text-align : center;'>
+      <h4><t t-esc="company.name"/>消费账单</h4>
+      <table style='width : 100%;'>
+        <tr>
+          <td>房间名称:</td>
+          <td><t t-esc="room.name"/></td>
+          <td></td>
+          <td>房间类型:</td>
+          <td><t t-esc="room.room_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>开房时间:</td>
+          <td><t t-esc="sum_paid_info.context_open_time"/></td>
+          <td></td>
+          <td>计费方式:</td>
+          <td><t t-esc="sum_paid_info.fee_type_id[1]"/></td>
+        </tr>
+
+        <tr>
+          <td>账 单 号:</td>
+          <td colspan="4"><t t-esc="sum_paid_info.bill_no"/></td>
+        </tr>
+
+        <tr>
+          <td>消费时长:</td>
+          <td><t t-esc="sum_paid_info.total_minutes"/></td>
+          <td></td>
+          <t t-if="sum_paid_info.last_member_id">
+            <td>会员姓名:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[2]"/></td>
+          </t>
+        </tr>
+        <tr>
+
+          <t t-if="sum_paid_info.last_member_id">
+            <td>会员卡号:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[1]"/></td>
+            <td></td>
+            <td>卡余额:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[3]"/></td>
+          </t>
+        </tr>
+
+        <tr><td colspan='5' style='border-bottom : 2px solid #000;'></td></tr>
+
+        <tr class="hourly_fee_lines">
+          <td>时段</td>
+          <td>折率</td>
+          <td>钟点费/小时</td>
+          <td>金额</td>
+          <td>时长</td>
+        </tr>
+        <t t-foreach="room_hourly_fee_lines" t-as="l">
+          <tr>
+            <td><t t-esc="l.context_time_from"/>~<t t-esc="l.context_time_to" /></td>
+            <td><t t-esc="l.hourly_discount"/></td>
+            <td><t t-esc="l.hourly_fee"/></td>
+            <td><t t-esc="l.sum_hourly_fee"/></td>
+            <td><t t-esc="l.consume_minutes"/></td>
+          </tr>
+        </t>
+        <tr><td colspan='5' style='border-bottom : 2px solid #000;'></td></tr>
+        <tr>
+          <td>钟点费合计:</td>
+          <td><t t-esc="sum_paid_info.hourly_fee + sum_paid_info.changed_room_hourly_fee"/></td>
+          <td></td>
+          <td>折扣金额:</td>
+          <td><t t-esc="sum_paid_info.total_discount_fee" /></td>
+          
+        </tr>
+        <tr>
+          <td>应收金额:</td>
+          <td><t t-esc="sum_paid_info.total_after_discount_fee" /></td>
+          <td></td>
+          <td>实收金额:</td>
+          <td><t t-esc="sum_paid_info.total_after_discount_fee" /></td>
+        </tr>
+        <tr>
+          <td>支付方式:</td>
+          <td colspan="4"><t t-esc="room_checkout.pay_type_describe" /></td>
+        </tr>
+
+
+        <tr>
+          <td>找零金额:</td>
+          <td colspan="4"><t t-esc="room_checkout.cash_change" /></td>
+        </tr>
+
+        <tr>
+          <td>收银员:</td>
+          <td colspan="4"><t t-esc="username"/></td>
+        </tr>
+        <tr>
+          <td colspan="5">谢谢光临!</td>
+        </tr>
+      </table>
+    </div>
+  </t>
+  <!--正常开房换房条-->
+  <t t-name="room-change-print-template">
+    <div class='room-opens-bill' style='text-align : center;'>
+      <h4><t t-esc="company.name"/>换房条</h4>
+      <table style='width : 100%;'>
+        <tr>
+          <td>账 单 号:</td>
+          <td colspan="2"><t t-esc="room_change.room_operate_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>开房时间:</td>
+          <td colspan="2"><t t-esc="sum_paid_info.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td>计费方式:</td>
+          <td colspan="2"><t t-esc="sum_paid_info.fee_type_id[1]"/></td>
+        </tr>
+ 
+        <tr>
+          <td>原包厢:</td>
+          <td colspan="2"><t t-esc="origin_room.name"/></td>
+        </tr>
+        <tr>
+          <td>原包厢类型:</td>
+          <td colspan="2"><t t-esc="origin_room.room_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>原钟点费:</td>
+          <td colspan="2"><t t-esc="origin_room.hourly_fee"/></td>
+        </tr>
+        <tr>
+          <td>消费时长:</td>
+          <td colspan="2"><t t-esc="sum_paid_info.consume_minutes"/></td>
+        </tr>
+         <tr>
+          <td>新包厢:</td>
+          <td colspan="2"><t t-esc="changed_room.name"/></td>
+        </tr>
+        <tr>
+          <td>新包厢类型:</td>
+          <td colspan="2"><t t-esc="changed_room.room_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>新钟点费:</td>
+          <td colspan="2"><t t-esc="changed_room.hourly_fee"/></td>
+        </tr>
+         <tr>
+          <td>换房时间:</td>
+          <td colspan="2"><t t-esc="room_change.context_open_time"/></td>
+        </tr>
+ 
+        <tr>
+          <td>打单人:</td>
+          <td colspan="2"><t t-esc="username"/></td>
+        </tr>
+        <tr>
+          <td>打单时间:</td>
+          <td colspan="2"><t t-esc="room_change.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td>客人签名:</td>
+          <td style='border-bottom : 2px solid #000;'>&#160;</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td colspan="3">请确认房号及所有设备完整,谢谢!</td>
+        </tr>
+      </table>
+    </div>
+  </t>
+  <!--买钟结账条-->
+  <t t-name="room-checkout-buytime-print-template">
+    <div class='room-opens-bill' style='text-align : center;'>
+      <h4><t t-esc="company.name"/>消费账单[买钟]</h4>
+      <table style='width : 100%;'>
+        <tr>
+          <td>房间名称:</td>
+          <td><t t-esc="room.name"/></td>
+          <td>房间类型:</td>
+          <td><t t-esc="room.room_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>开房时间:</td>
+          <td><t t-esc="sum_paid_info.context_open_time"/></td>
+          <td>计费方式:</td>
+          <td><t t-esc="sum_paid_info.fee_type_id[1]"/></td>
+        </tr>
+
+        <tr>
+          <td>账 单 号:</td>
+          <td colspan="3"><t t-esc="sum_paid_info.bill_no"/></td>
+        </tr>
+
+        <tr>
+          <td>消费时长:</td>
+          <td><t t-esc="sum_paid_info.total_minutes"/></td>
+          <t t-if="sum_paid_info.last_member_id">
+            <td>会员姓名:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[2]"/></td>
+          </t>
+        </tr>
+        <tr>
+          <t t-if="sum_paid_info.last_member_id">
+            <td>会员卡号:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[1]"/></td>
+            <td>卡余额:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[3]"/></td>
+          </t>
+        </tr>
+
+        <tr><td colspan='4' style='border-bottom : 2px solid #000;'></td></tr>
+
+        <tr class="hourly_fee_lines">
+          <td>时段</td>
+          <td>钟点费/小时</td>
+          <td>金额</td>
+          <td>时长</td>
+        </tr>
+        <tr>
+          <td><t t-esc="room_checkout_buytime.context_open_only_time"/>~<t t-esc="room_checkout_buytime.context_close_only_time" /></td> <td><t t-esc="room_checkout_buytime.room_hourly_fee"/></td> <td><t t-esc="sum_paid_info.hourly_fee"/></td>
+          <td><t t-esc="sum_paid_info.consume_minutes"/></td>
+        </tr>
+        <tr><td colspan='4' style='border-bottom : 2px solid #000;'></td></tr>
+        <tr>
+          <td>钟点费合计:</td>
+          <td><t t-esc="sum_paid_info.hourly_fee + sum_paid_info.changed_room_hourly_fee"/></td>
+          <td>折扣金额:</td>
+          <td><t t-esc="sum_paid_info.total_discount_fee" /></td>
+        </tr>
+        <tr>
+          <td>应收金额:</td>
+          <td><t t-esc="sum_paid_info.total_after_discount_fee" /></td>
+          <td>实收金额:</td>
+          <td><t t-esc="sum_paid_info.total_after_discount_fee" /></td>
+        </tr>
+        <tr>
+          <td>支付方式:</td>
+          <td colspan="3"><t t-esc="room_checkout_buytime.pay_type_describe" /></td>
+        </tr>
+        <tr>
+          <td>找零金额:</td>
+          <td colspan="3"><t t-esc="room_checkout_buytime.cash_change" /></td>
+        </tr>
+        <tr>
+          <td>收银员:</td>
+          <td colspan="3"><t t-esc="username"/></td>
+        </tr>
+        <tr>
+          <td colspan="4">谢谢光临!</td>
+        </tr>
+      </table>
+    </div>
+  </t>
+  <!--买断结账条-->
+  <t t-name="room-checkout-buyout-print-template">
+    <div class='room-opens-bill' style='text-align : center;'>
+      <h4><t t-esc="company.name"/>消费账单[买断]</h4>
+      <table style='width : 100%;'>
+        <tr>
+          <td>房间名称:</td>
+          <td><t t-esc="room.name"/></td>
+          <td>房间类型:</td>
+          <td><t t-esc="room.room_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>开房时间:</td>
+          <td><t t-esc="sum_paid_info.context_open_time"/></td>
+          <td>计费方式:</td>
+          <td><t t-esc="sum_paid_info.fee_type_id[1]"/></td>
+        </tr>
+
+        <tr>
+          <td>账 单 号:</td>
+          <td colspan="3"><t t-esc="sum_paid_info.bill_no"/></td>
+        </tr>
+
+        <tr>
+          <td>消费时长:</td>
+          <td><t t-esc="sum_paid_info.total_minutes"/></td>
+          <t t-if="sum_paid_info.last_member_id">
+            <td>会员姓名:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[2]"/></td>
+          </t>
+        </tr>
+        <tr>
+          <t t-if="sum_paid_info.last_member_id">
+            <td>会员卡号:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[1]"/></td>
+            <td>卡余额:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[3]"/></td>
+          </t>
+        </tr>
+
+        <tr><td colspan='4' style='border-bottom : 2px solid #000;'></td></tr>
+
+        <tr class="hourly_fee_lines">
+          <td>时段</td>
+          <td>金额</td>
+          <td>时长</td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><t t-esc="room_checkout_buyout.context_open_only_time"/>~<t t-esc="room_checkout_buyout.context_close_only_time" /></td>
+          <td><t t-esc="sum_paid_info.hourly_fee"/></td>
+          <td><t t-esc="sum_paid_info.consume_minutes"/></td>
+          <td></td>
+        </tr>
+        <tr><td colspan='4' style='border-bottom : 2px solid #000;'></td></tr>
+        <tr>
+          <td>钟点费合计:</td>
+          <td><t t-esc="sum_paid_info.hourly_fee + sum_paid_info.changed_room_hourly_fee"/></td>
+          <td>折扣金额:</td>
+          <td><t t-esc="sum_paid_info.total_discount_fee" /></td>
+        </tr>
+        <tr>
+          <td>应收金额:</td>
+          <td><t t-esc="sum_paid_info.total_after_discount_fee" /></td>
+          <td>实收金额:</td>
+          <td><t t-esc="sum_paid_info.total_after_discount_fee" /></td>
+        </tr>
+        <tr>
+          <td>支付方式:</td>
+          <td colspan="3"><t t-esc="room_checkout_buyout.pay_type_describe" /></td>
+        </tr>
+        <tr>
+          <td>找零金额:</td>
+          <td colspan="3"><t t-esc="room_checkout_buyout.cash_change" /></td>
+        </tr>
+        <tr>
+          <td>收银员:</td>
+          <td colspan="3"><t t-esc="username"/></td>
+        </tr>
+        <tr>
+          <td colspan="4">谢谢光临!</td>
+        </tr>
+      </table>
+    </div>
+  </t>
+  <!--买钟换房-->
+  <t t-name="room-change-checkout-buytime-print-template">
+    <div class='room-opens-bill' style='text-align : center;'>
+      <h4><t t-esc="company.name"/>换房条[买钟]</h4>
+      <table style='width : 100%;'>
+        <tr>
+          <td>账 单 号:</td>
+          <td colspan="3"><t t-esc="room_change_checkout_buytime.room_operate_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>开房时间:</td>
+          <td colspan="3"><t t-esc="p_checkout.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td>原包厢:</td>
+          <td colspan="3"><t t-esc="origin_room.name"/></td>
+        </tr>
+        <tr>
+          <td>原包厢类型:</td>
+          <td colspan="3"><t t-esc="origin_room.room_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>消费时长:</td>
+          <td colspan="3"><t t-esc="p_checkout.changed_room_minutes + p_checkout.consume_minutes"/></td>
+        </tr>
+         <tr>
+          <td>新包厢:</td>
+          <td colspan="3"><t t-esc="changed_room.name"/></td>
+        </tr>
+        <tr>
+          <td>新包厢类型:</td>
+          <td colspan="3"><t t-esc="changed_room.room_type_id[1]"/></td>
+        </tr>
+         <tr>
+          <td>换房时间:</td>
+          <td colspan="3"><t t-esc="room_change_checkout_buytime.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td colspan='4' style='border-bottom : 1px solid #000;'>原包厢计费方案</td>
+        </tr>
+        <tr>
+          <td>包厢名</td>
+          <td>计费时段</td>
+          <td>计费类型</td>
+          <td>费用</td>
+        </tr>
+        <tr>
+          <td><t t-esc="origin_room.name" /></td>
+          <td><t t-esc="p_checkout.context_open_only_time" />~<t t-esc="p_checkout.context_close_only_time" /></td>
+          <td><t t-esc="p_checkout.fee_type_id[1]" /></td>
+          <td><t t-esc="p_checkout.hourly_fee + p_checkout.changed_room_hourly_fee" /></td>
+        </tr>
+        <tr>
+          <td colspan='4' style='border-bottom : 1px solid #000;'>新包厢计费方案</td>
+        </tr>
+        <tr>
+          <td>包厢名</td>
+          <td>计费时段</td>
+          <td>计费类型</td>
+          <td>费用</td>
+        </tr>
+        <tr>
+          <td><t t-esc="changed_room.name" /></td>
+          <td><t t-esc="l_checkout.context_open_only_time" />~<t t-esc="l_checkout.context_close_only_time" /></td>
+          <td><t t-esc="l_checkout.fee_type_id[1]" /></td>
+          <td><t t-esc="l_checkout.hourly_fee + l_checkout.changed_room_hourly_fee" /></td>
+        </tr>
+        <tr><td colspan='4' style='border-bottom : 1px solid  #000'></td></tr>
+        <tr>
+          <td>打单人:</td>
+          <td colspan="3"><t t-esc="username"/></td>
+        </tr>
+        <tr>
+          <td>打单时间:</td>
+          <td colspan="3"><t t-esc="room_change_checkout_buytime.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td>客人签名:</td>
+          <td colspan='3' style='border-bottom : 1px solid #000;'>&#160;</td>
+        </tr>
+        <tr>
+          <td colspan="4">请确认房号及所有设备完整,谢谢!</td>
+        </tr>
+      </table>
+    </div>
+  </t>
+  <!--买断换房-->
+  <t t-name="room-change-checkout-buyout-print-template">
+    <div class='room-opens-bill' style='text-align : center;'>
+      <h4><t t-esc="company.name"/>换房条[买断]</h4>
+      <table style='width : 100%;'>
+        <tr>
+          <td>账 单 号:</td>
+          <td colspan="3"><t t-esc="room_change_checkout_buyout.room_operate_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>开房时间:</td>
+          <td colspan="3"><t t-esc="p_checkout.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td>原包厢:</td>
+          <td colspan="3"><t t-esc="origin_room.name"/></td>
+        </tr>
+        <tr>
+          <td>原包厢类型:</td>
+          <td colspan="3"><t t-esc="origin_room.room_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>消费时长:</td>
+          <td colspan="3"><t t-esc="p_checkout.changed_room_minutes + p_checkout.consume_minutes"/></td>
+        </tr>
+         <tr>
+          <td>新包厢:</td>
+          <td colspan="3"><t t-esc="changed_room.name"/></td>
+        </tr>
+        <tr>
+          <td>新包厢类型:</td>
+          <td colspan="3"><t t-esc="changed_room.room_type_id[1]"/></td>
+        </tr>
+         <tr>
+          <td>换房时间:</td>
+          <td colspan="3"><t t-esc="room_change_checkout_buyout.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td colspan='4' style='border-bottom : 1px solid #000;'>原包厢计费方案</td>
+        </tr>
+        <tr>
+          <td>包厢名</td>
+          <td>计费时段</td>
+          <td>计费类型</td>
+          <td>费用</td>
+        </tr>
+        <tr>
+          <td><t t-esc="origin_room.name" /></td>
+          <td><t t-esc="p_checkout.context_open_only_time" />~<t t-esc="p_checkout.context_close_only_time" /></td>
+          <td><t t-esc="p_checkout.fee_type_id[1]" /></td>
+          <td><t t-esc="p_checkout.hourly_fee + p_checkout.changed_room_hourly_fee" /></td>
+        </tr>
+        <tr>
+          <td colspan='4' style='border-bottom : 1px solid #000;'>新包厢计费方案</td>
+        </tr>
+        <tr>
+          <td>包厢名</td>
+          <td>计费时段</td>
+          <td>计费类型</td>
+          <td>费用</td>
+        </tr>
+        <tr>
+          <td><t t-esc="changed_room.name" /></td>
+          <td><t t-esc="l_checkout.context_open_only_time" />~<t t-esc="l_checkout.context_close_only_time" /></td>
+          <td><t t-esc="l_checkout.fee_type_id[1]" /></td>
+          <td><t t-esc="l_checkout.hourly_fee + l_checkout.changed_room_hourly_fee" /></td>
+        </tr>
+        <tr><td colspan='4' style='border-bottom : 1px solid  #000'></td></tr>
+        <tr>
+          <td>打单人:</td>
+          <td colspan="3"><t t-esc="username"/></td>
+        </tr>
+        <tr>
+          <td>打单时间:</td>
+          <td colspan="3"><t t-esc="room_change_checkout_buyout.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td>客人签名:</td>
+          <td colspan='3' style='border-bottom : 1px solid #000;'>&#160;</td>
+        </tr>
+        <tr>
+          <td colspan="4">请确认房号及所有设备完整,谢谢!</td>
+        </tr>
+      </table>
+    </div>
+  </t>
+  <!--退钟条-->
+  <t t-name="room-checkout-buytime-refund-print-template">
+    <div class='room-opens-bill' style='text-align : center;'>
+      <h4><t t-esc="company.name"/>退钟条</h4>
+      <table style='width : 100%;'>
+        <tr>
+          <td>账 单 号:</td>
+          <td colspan="3"><t t-esc="room_refund.room_operate_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>开房时间:</td>
+          <td colspan="3"><t t-esc="p_checkout.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td>包厢名称:</td>
+          <td colspan="3"><t t-esc="room.name"/></td>
+        </tr>
+        <tr>
+          <td>包厢类型:</td>
+          <td colspan="3"><t t-esc="room.room_type_id[1]"/></td>
+        </tr>
+         <tr>
+          <td>开房时间:</td>
+          <td colspan="3"><t t-esc="sum_paid_info.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td>原关房时间:</td>
+          <td colspan="3"><t t-esc="l_checkout.context_close_time"/></td>
+        </tr>
+        <tr>
+          <td>现关房时间:</td>
+          <td colspan="3"><t t-esc="l_checkout.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td>钟点费:</td>
+          <td colspan="3"><t t-esc="sum_paid_info.hourly_fee + sum_paid_info.changed_room_hourly_fee"/></td>
+        </tr>
+        <tr>
+          <td>原收金额:</td>
+          <td colspan="3"><t t-esc="sum_paid_info.total_fee"/></td>
+        </tr>
+        <tr>
+          <td>实收金额:</td>
+          <td colspan="3"><t t-esc="sum_paid_info.total_after_discount_fee"/></td>
+        </tr>
+        <tr>
+          <td>应退金额:</td>
+          <td colspan="3"><t t-esc="l_checkout.hourly_fee"/></td>
+        </tr>
+        <tr>
+          <td>打单时间:</td>
+          <td colspan="3"><t t-esc="room_refund.context_open_time"/></td>
+        </tr>
+        <tr>
+          <td>客人签名:</td>
+          <td colspan='3' style='border-bottom : 1px solid #000;'>&#160;</td>
+        </tr>
+        <tr>
+          <td colspan="4">欢迎下次光临!</td>
+        </tr>
+      </table>
+    </div>
+  </t>
+  <!--买钟结账条-->
+  <t t-name="room-checkout-buytime-continue-print-template">
+    <div class='room-opens-bill' style='text-align : center;'>
+      <h4><t t-esc="company.name"/>消费账单[续钟]</h4>
+      <table style='width : 100%;'>
+        <tr>
+          <td>房间名称:</td>
+          <td><t t-esc="room.name"/></td>
+          <td>房间类型:</td>
+          <td><t t-esc="room.room_type_id[1]"/></td>
+        </tr>
+        <tr>
+          <td>开房时间:</td>
+          <td><t t-esc="sum_paid_info.context_open_time"/></td>
+          <td>计费方式:</td>
+          <td><t t-esc="sum_paid_info.fee_type_id[1]"/></td>
+        </tr>
+
+        <tr>
+          <td>账 单 号:</td>
+          <td colspan="3"><t t-esc="sum_paid_info.bill_no"/></td>
+        </tr>
+
+        <tr>
+          <td>续钟时长:</td>
+          <td><t t-esc="room_continue.total_minutes"/></td>
+          <t t-if="sum_paid_info.last_member_id">
+            <td>会员姓名:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[2]"/></td>
+          </t>
+        </tr>
+        <tr>
+          <t t-if="sum_paid_info.last_member_id">
+            <td>会员卡号:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[1]"/></td>
+            <td>卡余额:</td>
+            <td><t t-esc="sum_paid_info.last_member_id[3]"/></td>
+          </t>
+        </tr>
+
+        <tr><td colspan='4' style='border-bottom : 2px solid #000;'></td></tr>
+
+        <tr class="hourly_fee_lines">
+          <td>时段</td>
+          <td>钟点费/小时</td>
+          <td>金额</td>
+          <td>时长</td>
+        </tr>
+        <tr>
+          <td><t t-esc="room_continue.context_open_only_time"/>~<t t-esc="room_continue.context_close_only_time" /></td> 
+          <td><t t-esc="room_continue.hourly_fee"/></td> 
+          <td><t t-esc="room_continue.hourly_fee"/></td> 
+          <td><t t-esc="room_continue.consume_minutes"/></td>
+        </tr>
+        <tr><td colspan='4' style='border-bottom : 2px solid #000;'></td></tr>
+        <tr>
+          <td>应收金额:</td>
+          <td><t t-esc="room_continue.total_fee" /></td>
+          <td>实收金额:</td>
+          <td><t t-esc="room_continue.total_after_discount_fee" /></td>
+        </tr>
+        <tr>
+          <td>支付方式:</td>
+          <td colspan="3"><t t-esc="room_continue.pay_type_describe" /></td>
+        </tr>
+        <tr>
+          <td>找零金额:</td>
+          <td colspan="3"><t t-esc="room_continue.cash_change" /></td>
+        </tr>
+        <tr>
+          <td>收银员:</td>
+          <td colspan="3"><t t-esc="username"/></td>
+        </tr>
+        <tr>
+          <td colspan="4">谢谢光临!</td>
+        </tr>
+      </table>
+    </div>
+  </t>
+  <t t-name="ktv.member_charge-print-template">
+    <div class='room-opens-bill' style='text-align : center;'>
+      <h4><t t-esc="company.name"/>会员充值单</h4>
+      <table style='width : 100%;'>
+        <tr>
+          <td>会员卡号:</td>
+          <td><t t-esc='print_context.member_id.member_card_no' /></td>
+        </tr>
+        <tr>
+          <td>会员姓名:</td>
+          <td><t t-esc='print_context.member_id.name' /></td>
+        </tr>
+        <tr>
+          <td>会员等级:</td>
+          <td><t t-esc='print_context.member_id.member_class_id[1]' /></td>
+        </tr>
+        <tr>
+          <td>充值前卡余额:</td>
+          <td><t t-esc='print_context.before_charge_balance' /></td>
+        </tr>
+        <tr>
+          <td>本次充值金额:</td>
+          <td><t t-esc='print_context.charge_fee' /></td>
+        </tr>
+        <tr>
+          <td>本次赠送:</td>
+          <td><t t-esc='print_context.present_charge_fee' /></td>
+        </tr>
+
+        <tr>
+          <td>充值后卡余额:</td>
+          <td><t t-esc='print_context.after_charge_balance' /></td>
+        </tr>
+        <tr>
+          <td>充值前卡积分:</td>
+          <td><t t-esc='print_context.before_charge_points'/></td>
+        </tr>
+        <tr>
+          <td>本次充值积分:</td>
+          <td><t t-esc='print_context.points' /></td>
+        </tr>
+        <tr>
+          <td>充值后卡积分:</td>
+          <td><t t-esc='print_context.after_charge_points' /></td>
+        </tr>
+        <tr>
+          <td>付款方式:</td>
+          <td><t t-esc='print_context.pay_type_id[1]' /></td>
+        </tr>
+        <tr><td colspan='2' style='border-bottom : 2px solid #000;'></td></tr>
+        <tr>
+          <td>操作人:</td>
+          <td><t t-esc="username" /></td>
+        </tr>
+        <tr>
+          <td>打单时间:</td>
+          <td><t t-esc="print_context.context_bill_date" /></td>
+        </tr>
+        <tr>
+          <td>客人签名:</td>
+          <td style='border-bottom : 2px solid #000;'>&#160;</td>
+        </tr>
+        <tr>
+          <td colspan="2" style='text-align : center;'>欢迎再次光临!</td>
+        </tr>
+        <tr>
+          <td colspan="2" style='text-align : right;font-weight : bold;'><t t-if="print_context.printed">补打</t></td>
+        </tr>
+      </table>
+    </div>
+  </t>
+  <!--日营业额统计打印模版-->
+  <t t-name='daily-report-print-template'>
+    <table class='table'>
+      <tr>
+        <td colspan='4' style='text-align  : center;font-weight : bold;font-size : 14px;'>
+          <t t-esc="company.name" />营业合计报表
+        </td>
+      </tr>
+      <tr>
+        <td>统计时间:</td>
+        <td><t t-esc='report.context_start_datetime'/></td>
+        <td>至</td>
+        <td><t t-esc='report.context_end_datetime'/></td>
+      </tr>
+      <tr>
+        <td>统计人:</td>
+        <td><t t-esc='username'/></td>
+        <td>打印时间:</td>
+        <td><t t-esc='report.context_print_datetime'/></td>
+      </tr>
+
+      <tr>
+        <td>现金:</td>
+        <td><t t-esc='report.cash_fee'/></td>
+        <td>会员卡:</td>
+        <td><t t-esc='report.member_card_fee'/></td>
+      </tr>
+      <tr>
+        <td>抵用券:</td>
+        <td><t t-esc='report.sales_voucher_fee'/></td>
+        <td>支票:</td>
+        <td><t t-esc='report.check_fee'/></td>
+      </tr>
+      <tr>
+        <td>免单:</td>
+        <td><t t-esc='report.free_fee'/></td>
+        <td>预付费:</td>
+        <td><t t-esc='report.prepay_fee'/></td>
+      </tr>
+      <tr>
+        <td>挂帐:</td>
+        <td><t t-esc='report.on_credit_fee'/></td>
+        <td>信用卡:</td>
+        <td><t t-esc='report.credit_card_fee'/></td>
+      </tr>
+      <tr>
+        <td>储值卡:</td>
+        <td><t t-esc='report.store_card_fee'/></td>
+        <td>实收金额:</td>
+        <td><t t-esc='report.total_after_discount_fee'/></td>
+      </tr>
+      <tr>
+        <td colspan='4' style='border-bottom : 2px solid #000;'>
+          实收金额 = 现金 + 会员卡 + 储值卡 + 抵用券商 + 信用卡 + 支票 - 预付费
+        </td>
+      </tr>
+
+      <tr>
+        <td>包厢费:</td>
+        <td><t t-esc='report.room_fee' /></td>
+        <td>钟点费:</td>
+        <td><t t-esc='report.hourly_fee' /></td>
+      </tr>
+
+      <tr>
+        <td>服务费:</td>
+        <td><t t-esc='report.service_fee' /></td>
+        <td>换/并房费:</td>
+        <td><t t-esc='report.changed_room_fee + report.changed_room_hourly_fee' /></td>
+      </tr>
+      <tr>
+        <td>应收金额:</td>
+        <td><t t-esc='report.total_fee' /></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td colspan='4' style='border-bottom : 2px solid #000;'>
+          应收金额 = 包厢费 + 钟点费 + 服务费 + 换/并房费
+        </td>
+      </tr>
+      <tr>
+        <td>折扣金额:</td>
+        <td><t t-esc='report.total_discount_fee' /></td>
+        <td>欢唱券:</td>
+        <td><t t-esc='report.song_ticket_minutes' /></td>
+      </tr>
+      <tr>
+        <td colspan='4' style='border-bottom : 2px solid #000;'>
+          实收金额 = 应收金额 - 折扣金额 - 免单 - 挂账 - 预付费
+        </td>
+      </tr>
+      <tr>
+        <th colspan='2'>会员类别</th>
+        <th colspan='2'>会员金额</th>
+      </tr>
+      <!--循环显示会员消费情况-->
+      <t t-foreach="report.group_member_class_fee" t-as='f'>
+        <tr>
+          <td colspan='2'><t t-esc='f[0]' /></td>
+          <td colspan='2'><t t-esc='f[1]' /></td>
+        </tr>
+      </t>
+      <tr>
+        <td colspan='4' style='border-bottom : 2px solid #000;'></td>
+      </tr>
+      <tr>
+        <th colspan='2'>包厢类型</th>
+        <th colspan='2'>实收金额</th>
+      </tr>
+ 
+      <!--TODO 循环显示包厢实收情况-->
+      <t t-foreach="report.group_room_type_fee" t-as='r'>
+        <tr>
+          <td colspan='2'><t t-esc='r[0]' /></td>
+          <td colspan='2'><t t-esc='r[1]' /></td>
+        </tr>
+      </t>
+    </table>
+  </t>
+</templates>

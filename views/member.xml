@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_member_form" model="ir.ui.view">
+            <field name="name">member_management.member_form</field>
+            <field name="model">member_management.member</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="member" version="7.0">
+                  <sheet>
+                    <group>
+                      <group col='6'>
+                        <field name="member_no" string="会员编号" select="1"/>
+                        <field name="name" string="会员姓名" select="1"/>
+                        <field name="member_card_no" string="会员卡号" select="1"/>
+
+                        <field name="member_class_id" string="会员等级" select="1"/>
+                        <field name="card_fee" string="制卡费用"/>
+                        <field name="card_state" string="卡状态" select="1"/>
+
+                        <field name="valid_date" string="有效期限"/>
+                        <field name="overdraft_fee" string="透支额度"/>
+                        <field name="balance" string="当前余额"/>
+
+                        <field name="points" string="积分"/>
+                        <field name="card_password" password="True" string="卡密码"/>
+                        <field name="card_password" password="True" string="确认密码"/>
+
+                        <field name="phone" string="联系电话" select="1" />
+                        <field name="birthday" string="出生日期" />
+                        <field name="sex" string="性别" />
+
+                        <field name="id_type" string="证件类型" />
+                        <field name="id_no" string="证件号" select="1" />
+                        <field name="v_no" string="车牌号" select="1" />
+
+
+                        <field name="qq" string="qq号" select="1" />
+                        <field name="email" string="E-mail" select="1" />
+                        <label colspan="2" string="" />
+
+                        <field name="company" string="工作单位" />
+                        <field colspan="4" name="address" string="联系地址"/>
+
+                        <field name="balance" string="卡余额" />
+                        <field name="points" string="当前积分"/>
+ 
+                      </group>
+                    </group>
+                    <group>
+                      <field name="photo" string="照片" widget="image" />
+                    </group>
+                    <notebook>
+                      <page string="充值记录">
+                        <field name="member_charge_ids" widget="one2many_list" readonly="1" nolabel="True">
+                          <tree string="member charge lines">
+                            <field name="bill_datetime" string="充值时间" />
+                            <field name="charge_fee" string="充值金额" />
+                            <field name="present_charge_fee" string="赠送金额" readonly="1" />
+                            <field name="pay_type_id" string="付款方式" />
+                            <field name="before_charge_balance" string="充值前余额" />
+                            <field name="after_charge_balance" string="充值后余额" />
+                          </tree>
+                        </field>
+                      </page>
+                      <page string="付款记录">
+                        <field name="member_consumption_ids" widget="one2many_list" readonly="1" nolabel="True">
+                          <tree string="member charge lines">
+                            <field name="bill_datetime" string="付款时间" />
+                            <field name="paid_fee" string="付款金额" />
+                            <field name="before_paid_balance" string="付款前余额" readonly="1" />
+                            <field name="after_paid_balance" string="付款后余额" readonly="1" />
+                            <field name="before_paid_points" string="付款前积分" />
+                            <field name="after_paid_points" string="付款后积分" />
+                          </tree>
+                        </field>
+                      </page>
+                    </notebook>
+                  </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_member_tree" model="ir.ui.view">
+            <field name="name">member_management.member_tree</field>
+            <field name="model">member_management.member</field>
+            <field name="type">tree</field>
+            <field name="arch" type="xml">
+                <tree string="会员信息">
+                    <field name="member_no" string="会员编号"/>
+                    <field name="name" string="会员姓名"/>
+                    <field name="phone" string="联系电话"/>
+                    <field name="qq" string="qq号"/>
+                    <field name="member_card_no" string="会员卡号"/>
+                    <field name="member_class_id" string="会员等级"/>
+                    <field name="balance" string="卡余额"/>
+                    <field name="points" string="积分"/>
+                    <field name="card_state" string="卡状态"/>
+                </tree>
+            </field>
+        </record>
+
+
+        <record id="action_member" model="ir.actions.act_window">
+            <field name="name">会员卡</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">member_management.member</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name='help'>设置会员信息</field>
+        </record>
+        <menuitem action="action_member" id="menu_action_member" parent="menu_members" name="会员信息" sequence="4"/>
+    </data>
+</openerp>
+
