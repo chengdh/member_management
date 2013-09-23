@@ -23,10 +23,6 @@
                 <field name="pay_type_id" string="付款方式"/>
               </group>
             </group>
-            <div>
-              <button name='%(action_print_service)d' string="打印充值收据" context="{'osv_name' : 'member_management.member_charge'}" type='action' />
-            </div>
-
           </sheet>
         </form>
       </field>

@@ -15,7 +15,6 @@ class member_class(osv.osv):
             'drinks_fee_discount' : fields.float('drinks_fee_discount',digits_compute = dp.get_precision('Ktv Fee'),help = "酒水费折扣%%"),
             'room_fee_discount' : fields.float('room_fee_discount',digits_compute = dp.get_precision('Ktv Fee'),help = "房费折扣%%"),
             'up_card_fee' : fields.float('up_card_fee',digits_compute = dp.get_precision('Ktv Fee'),help = "补卡费用"),
-            'drinks_price_type' : fields.selection(helper.price_list_for_selection,string="drinks_price_type",help = "酒水价格",required = True),
             'room_limit_count' : fields.integer('room_limit_count',help = "房费结算时,限制每天使用的次数,0为不限制"),
             'market_limit_count' : fields.integer('market_limit_count',help = "超市消费结算时,限制每天使用的次数,0为不限制"),
             'can_points' : fields.boolean('can_points',help="即该等级会员卡是否允许积分"),

@@ -2,9 +2,9 @@
 <openerp>
   <data noupdate="0">
 
-    <record id="group_ktv_manager" model="res.groups">
-      <field name="name">会员管理</field>
-      <field name="category_id" ref="base.module_category_ktv"/>
+    <record id="group_member_manager" model="res.groups">
+      <field name="name">会员卡管理</field>
+      <field name="category_id" ref="base.module_category_member_management"/>
     </record>
 
   </data>

@@ -38,10 +38,11 @@
     'depends': ["base", "process", "decimal_precision"],
     'init_xml': [],
     'data' : [
+#NOTE 要注意xml文件的顺序
         'security/ktv_security.xml',
+        'views/base.xml',
         #'security/ir.model.access.csv',
         'views/points_config.xml',
-        'views/base.xml',
         'views/member_class.xml',
         'views/member_class_change_config.xml',
         'views/member_recharge_pref.xml',
@@ -49,13 +50,8 @@
         'views/member_charge.xml',
         'views/discount_card_type.xml',
         ],
-    'demo': [
-        'test/member_test_data.yml'],
-    'test': [
-        'test/member_test_data.yml',
-        'test/member_consumption.yml',
-        #'test/ktv_room_test.yml',
-        ],
+    'demo': [],
+    'test': [],
     'installable': True,
     'application': True,
     # Web client
