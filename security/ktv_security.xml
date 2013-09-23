@@ -4,7 +4,7 @@
 
     <record id="group_member_manager" model="res.groups">
       <field name="name">会员卡管理</field>
-      <field name="category_id" ref="base.module_category_member_management"/>
+      <field name="category_id" ref="base.module_category_member"/>
     </record>
 
   </data>
